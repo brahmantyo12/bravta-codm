@@ -3,16 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bravta12 - Linktree</title>
+    <title>Bravta12 - Matrix Mode</title>
     <link rel="icon" href="header-bg.jpg" type="image/x-icon">
     
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+    
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
 
     <style>
         /* --- KONFIGURASI WARNA --- */
         :root {
-            --neon-green: #66FF00;
+            --matrix-green: #00FF41; /* Hijau Matrix Asli */
+            --dark-green: #008F11;
             --bg-black: #000000;
             --btn-text: #000000;
         }
@@ -21,8 +23,10 @@
 
         body {
             background-color: var(--bg-black);
-            color: var(--neon-green);
-            font-family: 'Inter', sans-serif;
+            color: var(--matrix-green);
+            /* Menggunakan Font VT323 untuk efek terminal */
+            font-family: 'VT323', monospace; 
+            font-size: 1.2rem; /* Font pixel butuh ukuran lebih besar agar terbaca */
             min-height: 100vh;
             display: flex;
             flex-direction: column;
@@ -46,33 +50,38 @@
             background-position: center top;
             position: relative;
             
-            /* Efek Gradasi Fading */
+            /* Efek Scanline (Garis-garis TV Jadul) */
+            box-shadow: inset 0 0 100px rgba(0,0,0,0.9);
+            
             mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 40%, rgba(0,0,0,0) 100%);
             -webkit-mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 40%, rgba(0,0,0,0) 100%);
         }
 
         /* --- DATA PROFIL --- */
         .profile-info {
-            margin-top: -220px; /* Menarik teks ke atas area dada */
+            margin-top: -220px;
             padding: 0 20px;
             position: relative;
             z-index: 10;
         }
 
         .username {
-            font-size: 2rem;
-            font-weight: 800;
-            margin-bottom: 5px;
-            text-shadow: 0 4px 15px #000000, 0 2px 5px #000000; 
+            font-size: 3.5rem; /* Ukuran besar untuk font pixel */
+            font-weight: 400; /* Font pixel tidak butuh bold */
+            margin-bottom: 0px;
+            text-transform: uppercase;
+            /* Efek Cahaya (Glow) Matrix */
+            text-shadow: 0 0 10px var(--matrix-green), 0 0 20px var(--dark-green), 2px 2px 0px #000;
+            letter-spacing: 2px;
         }
 
         .bio {
-            font-size: 0.95rem; /* Ukuran font sedikit disesuaikan agar muat */
-            line-height: 1.5;
-            font-weight: 600;
+            font-size: 1.3rem;
+            line-height: 1.2;
             margin-bottom: 25px;
-            text-shadow: 0 2px 10px #000000; 
             color: #ccffcc;
+            text-shadow: 0 0 5px var(--dark-green), 1px 1px 0 #000;
+            text-transform: uppercase;
         }
 
         /* --- TOMBOL LINKS --- */
@@ -80,36 +89,40 @@
             padding: 0 15px;
             display: flex;
             flex-direction: column;
-            gap: 12px;
+            gap: 15px;
         }
 
         .section-header {
-            font-size: 0.85rem;
-            font-weight: 700;
+            font-size: 1.2rem;
             margin: 15px 0 5px 0;
-            text-transform: capitalize;
-            color: var(--neon-green);
+            text-transform: uppercase;
+            color: var(--matrix-green);
+            letter-spacing: 2px;
+            text-shadow: 0 0 5px var(--matrix-green);
         }
 
         .link-btn {
-            background-color: var(--neon-green);
+            background-color: var(--matrix-green);
             color: var(--btn-text);
-            padding: 18px 20px;
-            border-radius: 4px;
+            padding: 15px 20px;
+            border-radius: 0px; /* Matrix identik dengan kotak tajam, bukan bulat */
             text-decoration: none;
-            font-weight: 700;
-            font-size: 0.95rem;
+            font-size: 1.4rem; /* Perbesar teks tombol */
             display: flex;
             align-items: center;
             justify-content: space-between;
-            transition: transform 0.2s;
-            border: none;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+            transition: all 0.2s;
+            border: 1px solid var(--matrix-green);
+            box-shadow: 0 0 10px rgba(0, 255, 65, 0.3);
+            text-transform: uppercase; /* Huruf kapital semua biar sangar */
         }
 
         .link-btn:hover {
+            background-color: #000; /* Balik warna saat hover */
+            color: var(--matrix-green);
+            box-shadow: 0 0 20px var(--matrix-green);
+            border: 1px solid var(--matrix-green);
             transform: scale(1.02);
-            filter: brightness(1.1);
         }
 
         .btn-content {
@@ -121,29 +134,30 @@
             margin-right: -15px;
         }
 
-        .icon-left { font-size: 1.3rem; }
-        .icon-dots { font-size: 1rem; opacity: 0.6; }
+        .icon-left { font-size: 1.5rem; }
+        .icon-dots { font-size: 1.2rem; opacity: 0.6; }
 
         /* --- FOOTER --- */
         .footer-icons {
             margin-top: 40px;
             display: flex;
             justify-content: center;
-            gap: 20px;
+            gap: 25px;
         }
 
         .footer-icons a {
-            color: var(--neon-green);
-            font-size: 1.5rem;
+            color: var(--matrix-green);
+            font-size: 1.8rem;
             text-decoration: none;
-            text-shadow: 0 0 10px rgba(102, 255, 0, 0.3);
+            text-shadow: 0 0 8px var(--matrix-green);
+            transition: transform 0.2s;
         }
 
-        .qr-code {
-            margin-top: 30px;
-            text-align: right;
-            padding-right: 20px;
+        .footer-icons a:hover {
+            transform: translateY(-5px);
+            color: #fff;
         }
+
     </style>
 </head>
 <body>
@@ -155,8 +169,7 @@
         <div class="profile-info">
             <h1 class="username">@bravta12</h1>
             <p class="bio">
-                Founder FalconIDNest Community<br>
-                Leader FalconIDN CoDM Clan<br>
+                Founder FalconIDNest Community | Leader FalconIDN CoDM Clan<br>
                 Kapten FalconIDN Bravo Six Team<br>
                 Leader [Official] CoDM Komunitas Jawa Barat<br>
                 Vice Leader Community Clan Indonesia
@@ -165,11 +178,11 @@
 
         <div class="links">
 
-            <div class="section-header" style="margin-top: 0;">My Content</div>
+            <div class="section-header" style="margin-top: 0;">:: My Content ::</div>
 
             <a href="https://youtube.com/@bravta12" class="link-btn">
                 <i class="fab fa-youtube icon-left"></i>
-                <span class="btn-content">Bravta Wuto: Gaming & AMV Videos</span>
+                <span class="btn-content">Bravta Wuto: Gaming & AMV</span>
                 <i class="fas fa-ellipsis-v icon-dots"></i>
             </a>
 
@@ -185,7 +198,7 @@
                 <i class="fas fa-ellipsis-v icon-dots"></i>
             </a>
 
-            <div class="section-header">Support by donate or buy my things</div>
+            <div class="section-header">:: Support & Store ::</div>
 
             <a href="https://saweria.co/bravta12" class="link-btn">
                 <i class="fas fa-hand-holding-dollar icon-left"></i>
@@ -195,7 +208,7 @@
 
             <a href="#" class="link-btn">
                 <i class="fas fa-store icon-left"></i>
-                <span class="btn-content">BTStore12: Aneka Produk Online</span>
+                <span class="btn-content">BTStore12: Aneka Produk</span>
                 <i class="fas fa-ellipsis-v icon-dots"></i>
             </a>
 
@@ -208,11 +221,13 @@
         </div>
 
         <div class="footer-icons">
-            <a href=""><i class="fas fa-envelope"></i></a>
-            <a href="https://www.paypal.me/BTStore12"><i class="fas fa-dollar-sign"></i></a>
-            <a href="https://t.me/Bravta12"><i class="fab fa-telegram"></i></a>
-            <a href="https://www.tiktok.com/@bravta12"><i class="fab fa-tiktok"></i></a>
-            <a href="https://wa.me/6281703792075"><i class="fab fa-whatsapp"></i></a>
+            <a href="#"><i class="fab fa-youtube"></i></a>
+            <a href="#"><i class="fab fa-whatsapp"></i></a>
+            <a href="#"><i class="fas fa-envelope"></i></a>
+            <a href="#"><i class="fas fa-dollar-sign"></i></a>
+            <a href="#"><i class="fab fa-telegram"></i></a>
+            <a href="#"><i class="fab fa-tiktok"></i></a>
+            <a href="#"><i class="fab fa-whatsapp"></i></a>
         </div>
 
     </div>
