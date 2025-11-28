@@ -13,7 +13,7 @@
     <style>
         /* --- KONFIGURASI WARNA --- */
         :root {
-            --matrix-green: #00FF41; /* Hijau Matrix Asli */
+            --matrix-green: #00FF41; 
             --dark-green: #008F11;
             --bg-black: #000000;
             --btn-text: #000000;
@@ -24,9 +24,8 @@
         body {
             background-color: var(--bg-black);
             color: var(--matrix-green);
-            /* Menggunakan Font VT323 untuk efek terminal */
             font-family: 'VT323', monospace; 
-            font-size: 1.2rem; /* Font pixel butuh ukuran lebih besar agar terbaca */
+            font-size: 1.2rem;
             min-height: 100vh;
             display: flex;
             flex-direction: column;
@@ -50,9 +49,7 @@
             background-position: center top;
             position: relative;
             
-            /* Efek Scanline (Garis-garis TV Jadul) */
             box-shadow: inset 0 0 100px rgba(0,0,0,0.9);
-            
             mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 40%, rgba(0,0,0,0) 100%);
             -webkit-mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 40%, rgba(0,0,0,0) 100%);
         }
@@ -66,11 +63,10 @@
         }
 
         .username {
-            font-size: 3.5rem; /* Ukuran besar untuk font pixel */
-            font-weight: 400; /* Font pixel tidak butuh bold */
+            font-size: 3.5rem; 
+            font-weight: 400; 
             margin-bottom: 0px;
             text-transform: uppercase;
-            /* Efek Cahaya (Glow) Matrix */
             text-shadow: 0 0 10px var(--matrix-green), 0 0 20px var(--dark-green), 2px 2px 0px #000;
             letter-spacing: 2px;
         }
@@ -104,34 +100,44 @@
         .link-btn {
             background-color: var(--matrix-green);
             color: var(--btn-text);
-            padding: 15px 20px;
-            border-radius: 0px; /* Matrix identik dengan kotak tajam, bukan bulat */
+            padding: 12px 20px; /* Padding sedikit dikecilkan biar muat 2 baris */
+            border-radius: 0px; 
             text-decoration: none;
-            font-size: 1.4rem; /* Perbesar teks tombol */
+            font-size: 1.4rem; 
             display: flex;
             align-items: center;
             justify-content: space-between;
             transition: all 0.2s;
             border: 1px solid var(--matrix-green);
             box-shadow: 0 0 10px rgba(0, 255, 65, 0.3);
-            text-transform: uppercase; /* Huruf kapital semua biar sangar */
+            text-transform: uppercase; 
         }
 
         .link-btn:hover {
-            background-color: #000; /* Balik warna saat hover */
+            background-color: #000; 
             color: var(--matrix-green);
             box-shadow: 0 0 20px var(--matrix-green);
             border: 1px solid var(--matrix-green);
             transform: scale(1.02);
         }
 
+        /* Wrapper untuk Teks Tombol (Agar bisa 2 baris) */
         .btn-content {
             display: flex;
+            flex-direction: column; /* Susun vertikal */
             align-items: center;
-            gap: 15px;
-            flex-grow: 1;
             justify-content: center;
+            flex-grow: 1;
             margin-right: -15px;
+            line-height: 1.1; /* Rapatkan jarak baris */
+        }
+
+        /* Teks Statistik Kecil */
+        .stats {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            margin-top: 2px;
+            letter-spacing: 1px;
         }
 
         .icon-left { font-size: 1.5rem; }
@@ -171,7 +177,7 @@
             <p class="bio">
                 Founder FalconIDNest Community | Leader FalconIDN CoDM Clan<br>
                 Kapten FalconIDN Bravo Six Team<br>
-                Leader CoDM Komunitas Jawa Barat<br>
+                Leader [Official] CoDM Komunitas Jawa Barat<br>
                 Vice Leader Community Clan Indonesia
             </p>
         </div>
@@ -182,19 +188,27 @@
 
             <a href="https://youtube.com/@bravta12" class="link-btn">
                 <i class="fab fa-youtube icon-left"></i>
-                <span class="btn-content">Bravta Wuto: Gaming & AMV</span>
+                <div class="btn-content">
+                    <span>Bravta Wuto: Gaming & AMV</span>
+                    <span class="stats">14 Subscribers • 20+ Videos</span>
+                </div>
                 <i class="fas fa-ellipsis-v icon-dots"></i>
             </a>
 
             <a href="https://tiktok.com/@bravta12" class="link-btn">
                 <i class="fab fa-tiktok icon-left"></i>
-                <span class="btn-content">My Tiktok</span>
+                <div class="btn-content">
+                    <span>My Tiktok</span>
+                    <span class="stats">698 Followers</span>
+                </div>
                 <i class="fas fa-ellipsis-v icon-dots"></i>
             </a>
 
             <a href="https://brahmantyo-cv.blogspot.com" class="link-btn">
                 <i class="fab fa-blogger icon-left"></i>
-                <span class="btn-content">Blogger</span>
+                <div class="btn-content">
+                    <span>Blogger</span>
+                </div>
                 <i class="fas fa-ellipsis-v icon-dots"></i>
             </a>
 
@@ -202,32 +216,34 @@
 
             <a href="https://saweria.co/bravta12" class="link-btn">
                 <i class="fas fa-hand-holding-dollar icon-left"></i>
-                <span class="btn-content">Saweria</span>
+                <div class="btn-content">
+                    <span>Saweria</span>
+                </div>
                 <i class="fas fa-ellipsis-v icon-dots"></i>
             </a>
 
             <a href="#" class="link-btn">
                 <i class="fas fa-store icon-left"></i>
-                <span class="btn-content">BTStore12: Aneka Produk</span>
+                <div class="btn-content">
+                    <span>BTStore12: Aneka Produk</span>
+                </div>
                 <i class="fas fa-ellipsis-v icon-dots"></i>
             </a>
 
             <a href="https://maps.google.com" class="link-btn">
                 <i class="fas fa-map-marked-alt icon-left"></i>
-                <span class="btn-content">Our location on Gmaps</span>
+                <div class="btn-content">
+                    <span>Our location on Gmaps</span>
+                </div>
                 <i class="fas fa-ellipsis-v icon-dots"></i>
             </a>
 
         </div>
 
         <div class="footer-icons">
-            <a href="#"><i class="fab fa-youtube"></i></a>
-            <a href="#"><i class="fab fa-whatsapp"></i></a>
-            <a href="#"><i class="fas fa-envelope"></i></a>
-            <a href="#"><i class="fas fa-dollar-sign"></i></a>
-            <a href="#"><i class="fab fa-telegram"></i></a>
-            <a href="#"><i class="fab fa-tiktok"></i></a>
-            <a href="#"><i class="fab fa-whatsapp"></i></a>
+            <a href="https://api.whatsapp.com/send?phone=6281703792075"><i class="fab fa-whatsapp"></i></a>
+            <a href="https://www.paypal.me/BTStore12"><i class="fas fa-dollar-sign"></i></a>
+            <a href="https://t.me/Bravta12/#"><i class="fab fa-telegram"></i></a>
         </div>
 
     </div>
