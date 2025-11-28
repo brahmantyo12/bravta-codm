@@ -3,162 +3,221 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bravta12 - CODM Profile</title>
-    <link rel="icon" href="profile.jpg" type="image/x-icon">
+    <title>Bravta12 - Linktree</title>
+    <link rel="icon" href="header-bg.jpg" type="image/x-icon">
     
-    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;700&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"/>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
 
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        
+        /* --- KONFIGURASI WARNA --- */
+        :root {
+            --neon-green: #66FF00; /* Hijau Neon Terang */
+            --bg-black: #000000;
+            --btn-text: #000000;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
         body {
-            background-color: #0b0b0b;
-            background-image: 
-                linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.9)), 
-                url('https://wallpapers.com/images/hd/call-of-duty-mobile-4k-character-collage-0w2x3a4y5z6b7c8d.jpg'); /* Background CODM (Bisa diganti) */
-            background-size: cover;
-            background-position: center;
-            background-attachment: fixed;
-            color: #fff;
-            font-family: 'Poppins', sans-serif;
-            display: flex;
-            justify-content: center;
+            background-color: var(--bg-black);
+            color: var(--neon-green); /* Semua teks default hijau */
+            font-family: 'Inter', sans-serif;
             min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
 
         .container {
             width: 100%;
-            max-width: 480px;
-            padding: 40px 20px;
+            max-width: 500px; /* Lebar mobile ideal */
+            padding-bottom: 50px;
             text-align: center;
+            position: relative;
         }
 
-        /* Profil Section */
-        .profile-img {
-            width: 120px;
-            height: 120px;
-            border-radius: 50%;
-            border: 3px solid #fdd835; /* Kuning CODM */
-            object-fit: cover;
-            margin-bottom: 15px;
-            box-shadow: 0 0 20px rgba(253, 216, 53, 0.3);
+        /* --- HEADER GAMBAR BESAR --- */
+        .hero-header {
+            width: 100%;
+            height: 450px; /* Tinggi gambar */
+            background-image: url('header-bg.jpg'); /* FOTO ANDA */
+            background-size: cover;
+            background-position: center top;
+            position: relative;
+            /* Efek Gradasi Hitam di Bawah Gambar (Fading) */
+            mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 60%, rgba(0,0,0,0) 100%);
+            -webkit-mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 60%, rgba(0,0,0,0) 100%);
+        }
+
+        /* --- DATA PROFIL --- */
+        .profile-info {
+            margin-top: -60px; /* Menarik teks ke atas agar menumpuk gambar */
+            padding: 0 20px;
+            position: relative;
+            z-index: 10;
         }
 
         .username {
-            font-family: 'Rajdhani', sans-serif;
-            font-size: 2rem;
-            font-weight: 700;
-            letter-spacing: 2px;
-            color: #fdd835;
-            text-transform: uppercase;
-            margin-bottom: 5px;
-            text-shadow: 0 2px 5px rgba(0,0,0,0.5);
+            font-size: 1.8rem;
+            font-weight: 800;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 10px #000; /* Bayangan agar terbaca */
         }
 
         .bio {
             font-size: 0.9rem;
-            color: #ccc;
+            line-height: 1.4;
+            font-weight: 600;
             margin-bottom: 30px;
-            line-height: 1.5;
+            text-shadow: 0 2px 5px #000;
         }
 
-        /* Tombol Links */
+        /* --- TOMBOL LINKS --- */
         .links {
+            padding: 0 15px;
             display: flex;
             flex-direction: column;
-            gap: 15px;
+            gap: 12px;
+        }
+
+        .section-header {
+            font-size: 0.85rem;
+            font-weight: 700;
+            margin: 15px 0 5px 0;
+            text-transform: capitalize;
+            color: var(--neon-green);
         }
 
         .link-btn {
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(5px);
-            color: #fff;
-            padding: 18px;
-            border-radius: 50px; /* Tombol Bulat Lonjong */
+            background-color: var(--neon-green);
+            color: var(--btn-text);
+            padding: 18px 20px;
+            border-radius: 4px; /* Sudut sedikit melengkung */
             text-decoration: none;
-            font-weight: 600;
-            font-size: 1rem;
-            border: 2px solid rgba(255, 255, 255, 0.1);
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
+            font-weight: 700;
+            font-size: 0.95rem;
             display: flex;
             align-items: center;
-            justify-content: center;
+            justify-content: space-between; /* Ikon kiri, Teks tengah, Titik kanan */
+            transition: transform 0.2s;
+            border: none;
         }
 
-        .link-btn i {
-            position: absolute;
-            left: 25px;
-            font-size: 1.2rem;
-        }
-
-        /* Efek Hover Keren */
         .link-btn:hover {
-            background: #fdd835;
-            color: #000;
-            border-color: #fdd835;
-            transform: translateY(-3px);
-            box-shadow: 0 5px 15px rgba(253, 216, 53, 0.4);
+            transform: scale(1.02);
+            filter: brightness(1.1);
         }
 
-        /* Footer */
-        footer {
+        /* Trik agar teks benar-benar di tengah */
+        .btn-content {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex-grow: 1;
+            justify-content: center;
+            margin-right: -15px; /* Kompensasi ikon kiri */
+        }
+
+        .icon-left { font-size: 1.3rem; }
+        .icon-dots { font-size: 1rem; opacity: 0.6; }
+
+        /* --- FOOTER --- */
+        .footer-icons {
             margin-top: 40px;
-            font-size: 0.75rem;
-            color: #666;
-        }
-        
-        footer a { color: #888; text-decoration: none; }
-
-        /* Animasi Masuk */
-        .fade-in {
-            animation: fadeIn 1s ease-in-out;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
         }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
+        .footer-icons a {
+            color: var(--neon-green);
+            font-size: 1.5rem;
+            text-decoration: none;
         }
+
+        .qr-code {
+            margin-top: 30px;
+            text-align: right;
+            padding-right: 20px;
+        }
+        .qr-code img { width: 60px; height: 60px; background: #fff; padding: 2px; }
+
     </style>
 </head>
 <body>
 
-    <div class="container fade-in">
-        <img src="profile.jpg" alt="Bravta12" class="profile-img">
+    <div class="container">
         
-        <h1 class="username">BRAVTA12</h1>
-        <p class="bio">
-            Call of Duty Mobile Player 🇮🇩<br>
-            Slayer / Support | Garena Server
-        </p>
+        <div class="hero-header"></div>
 
-        <div class="links">
-            <a href="https://youtube.com/@bravta12" target="_blank" class="link-btn">
-                <i class="fab fa-youtube"></i> Subscribe YouTube
-            </a>
-
-            <a href="https://tiktok.com/@bravta12" target="_blank" class="link-btn">
-                <i class="fab fa-tiktok"></i> Follow TikTok
-            </a>
-
-            <a href="https://instagram.com/bravta12" target="_blank" class="link-btn">
-                <i class="fab fa-instagram"></i> Instagram
-            </a>
-
-            <a href="https://wa.me/6281703792075" target="_blank" class="link-btn">
-                <i class="fab fa-whatsapp"></i> Ajak Mabar / Sparring
-            </a>
-            
-            <a href="https://brahmantyo12.my.id" target="_blank" class="link-btn" style="border-color: #fdd835; color: #fdd835;">
-                <i class="fas fa-briefcase"></i> Cek Portofolio Profesional
-            </a>
+        <div class="profile-info">
+            <h1 class="username">@bravta12</h1>
+            <p class="bio">
+                IT Support | Network Engineering. Berpengalaman 5+ tahun, 
+                berorientasi pada peningkatan skill dan penguatan infrastruktur kerja yang efisien.
+            </p>
         </div>
 
-        <footer>
-            <p>&copy; 2025 Bravta12 CODM Page</p>
-        </footer>
+        <div class="links">
+
+            <a href="https://wa.me/6281703792075" class="link-btn">
+                <span style="width: 20px;"></span> <span class="btn-content">Contact Form</span>
+                <i class="fas fa-ellipsis-v icon-dots"></i>
+            </a>
+
+            <div class="section-header">My Content</div>
+
+            <a href="https://youtube.com/@bravta12" class="link-btn">
+                <i class="fab fa-youtube icon-left"></i>
+                <span class="btn-content">Bravta Wuto: Gaming & AMV Videos</span>
+                <i class="fas fa-ellipsis-v icon-dots"></i>
+            </a>
+
+            <a href="https://tiktok.com/@bravta12" class="link-btn">
+                <i class="fab fa-tiktok icon-left"></i>
+                <span class="btn-content">My Tiktok</span>
+                <i class="fas fa-ellipsis-v icon-dots"></i>
+            </a>
+
+            <a href="https://brahmantyo-cv.blogspot.com" class="link-btn">
+                <i class="fab fa-blogger icon-left"></i>
+                <span class="btn-content">Blogger</span>
+                <i class="fas fa-ellipsis-v icon-dots"></i>
+            </a>
+
+            <div class="section-header">Support by donate or buy my things</div>
+
+            <a href="https://saweria.co/bravta12" class="link-btn">
+                <i class="fas fa-hand-holding-dollar icon-left"></i>
+                <span class="btn-content">Saweria</span>
+                <i class="fas fa-ellipsis-v icon-dots"></i>
+            </a>
+
+            <a href="#" class="link-btn">
+                <i class="fas fa-store icon-left"></i>
+                <span class="btn-content">BTStore12: Aneka Produk Online</span>
+                <i class="fas fa-ellipsis-v icon-dots"></i>
+            </a>
+
+            <a href="https://maps.google.com" class="link-btn">
+                <i class="fas fa-map-marked-alt icon-left"></i>
+                <span class="btn-content">Our location on Gmaps</span>
+                <i class="fas fa-ellipsis-v icon-dots"></i>
+            </a>
+
+        </div>
+
+        <div class="footer-icons">
+            <a href="#"><i class="fab fa-youtube"></i></a>
+            <a href="#"><i class="fab fa-whatsapp"></i></a>
+            <a href="#"><i class="fas fa-envelope"></i></a>
+            <a href="#"><i class="fas fa-dollar-sign"></i></a>
+            <a href="#"><i class="fab fa-telegram"></i></a>
+            <a href="#"><i class="fab fa-tiktok"></i></a>
+            <a href="#"><i class="fab fa-whatsapp"></i></a>
+        </div>
+
     </div>
 
 </body>
