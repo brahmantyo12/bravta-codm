@@ -7,7 +7,6 @@
     <link rel="icon" href="header-bg.jpg" type="image/x-icon">
     
     <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
-    
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
 
     <style>
@@ -100,13 +99,14 @@
         .link-btn {
             background-color: var(--matrix-green);
             color: var(--btn-text);
-            padding: 12px 20px; /* Padding sedikit dikecilkan biar muat 2 baris */
+            padding: 12px 20px; 
             border-radius: 0px; 
             text-decoration: none;
             font-size: 1.4rem; 
             display: flex;
             align-items: center;
-            justify-content: space-between;
+            justify-content: flex-start; /* Ubah ke flex-start agar ikon dan teks mepet kiri */
+            gap: 15px; /* Jarak antara ikon dan teks */
             transition: all 0.2s;
             border: 1px solid var(--matrix-green);
             box-shadow: 0 0 10px rgba(0, 255, 65, 0.3);
@@ -121,15 +121,14 @@
             transform: scale(1.02);
         }
 
-        /* Wrapper untuk Teks Tombol (Agar bisa 2 baris) */
+        /* Wrapper untuk Teks Tombol */
         .btn-content {
             display: flex;
-            flex-direction: column; /* Susun vertikal */
-            align-items: center;
+            flex-direction: column; 
+            align-items: flex-start; /* Teks rata kiri */
             justify-content: center;
             flex-grow: 1;
-            margin-right: -15px;
-            line-height: 1.1; /* Rapatkan jarak baris */
+            line-height: 1.1; 
         }
 
         /* Teks Statistik Kecil */
@@ -141,7 +140,6 @@
         }
 
         .icon-left { font-size: 1.5rem; }
-        .icon-dots { font-size: 1.2rem; opacity: 0.6; }
 
         /* --- FOOTER --- */
         .footer-icons {
@@ -193,7 +191,6 @@
                     <span>Bravta Wuto: Gaming & AMV</span>
                     <span class="stats">14 Subscribers • 20+ Videos</span>
                 </div>
-                <i class="fas fa-ellipsis-v icon-dots"></i>
             </a>
 
             <a href="https://tiktok.com/@bravta12" class="link-btn">
@@ -202,15 +199,6 @@
                     <span>My Tiktok</span>
                     <span class="stats">698 Followers</span>
                 </div>
-                <i class="fas fa-ellipsis-v icon-dots"></i>
-            </a>
-
-            <a href="https://brahmantyo-cv.blogspot.com" class="link-btn">
-                <i class="fab fa-blogger icon-left"></i>
-                <div class="btn-content">
-                    <span>Blogger</span>
-                </div>
-                <i class="fas fa-ellipsis-v icon-dots"></i>
             </a>
 
             <div class="section-header">:: Support & Store ::</div>
@@ -220,7 +208,6 @@
                 <div class="btn-content">
                     <span>Saweria</span>
                 </div>
-                <i class="fas fa-ellipsis-v icon-dots"></i>
             </a>
 
             <a href="#" class="link-btn">
@@ -228,7 +215,6 @@
                 <div class="btn-content">
                     <span>BTStore12: Aneka Produk</span>
                 </div>
-                <i class="fas fa-ellipsis-v icon-dots"></i>
             </a>
 
             <a href="https://maps.google.com" class="link-btn">
@@ -236,7 +222,6 @@
                 <div class="btn-content">
                     <span>Our location on Gmaps</span>
                 </div>
-                <i class="fas fa-ellipsis-v icon-dots"></i>
             </a>
 
         </div>
