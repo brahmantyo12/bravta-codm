@@ -10,12 +10,12 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"/>
     
     <style>
-        /* --- 1. CONFIGURATION & VARIABLES (CODM PALETTE) --- */
+        /* --- 1. CONFIGURATION (CODM PALETTE) --- */
         :root {
-            --codm-green: #50b748; /* Hijau Khas UI Modern Warfare */
-            --codm-gold: #ff9c00;  /* Warna Emas/Oranye Highlight */
-            --bg-dark: #050505;    /* Hitam Pekat */
-            --bg-panel: rgba(20, 24, 28, 0.95); /* Panel Semi-Transparan */
+            --codm-green: #50b748; 
+            --codm-gold: #ff9c00;  
+            --bg-dark: #050505;    
+            --bg-panel: rgba(20, 24, 28, 0.95); 
         }
 
         /* --- 2. GLOBAL STYLES --- */
@@ -23,7 +23,7 @@
         
         body {
             background-color: var(--bg-dark);
-            /* Pattern Grid Halus ala Tactical Map */
+            /* Pattern Grid */
             background-image: 
                 linear-gradient(rgba(80, 183, 72, 0.03) 1px, transparent 1px),
                 linear-gradient(90deg, rgba(80, 183, 72, 0.03) 1px, transparent 1px);
@@ -35,4 +35,34 @@
             align-items: center;
             min-height: 100vh;
             margin: 0;
-            padding: 15px; /* Padding body agar tidak mepet di HP */
+            padding: 15px;
+        }
+
+        /* --- 3. MAIN CONTAINER --- */
+        .container {
+            background: var(--bg-panel);
+            width: 100%;
+            max-width: 500px;
+            padding: 40px 30px;
+            border: 1px solid #333;
+            position: relative;
+            box-shadow: 0 0 25px rgba(80, 183, 72, 0.1);
+            clip-path: polygon(20px 0, 100% 0, 100% calc(100% - 20px), calc(100% - 20px) 100%, 0 100%, 0 20px);
+        }
+
+        /* Garis Dekorasi */
+        .container::before {
+            content: ''; position: absolute; top: 0; left: 0; width: 100px; height: 3px;
+            background: var(--codm-green); box-shadow: 0 0 10px var(--codm-green);
+        }
+        .container::after {
+            content: ''; position: absolute; bottom: 0; right: 0; width: 100px; height: 3px;
+            background: var(--codm-green); box-shadow: 0 0 10px var(--codm-green);
+        }
+
+        /* --- 4. TYPOGRAPHY --- */
+        h2 { 
+            text-align: center; 
+            margin-bottom: 25px; 
+            font-family: 'Orbitron', sans-serif;
+            font-size
