@@ -10,12 +10,12 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"/>
     
     <style>
-        /* --- 1. CONFIGURATION (CODM PALETTE) --- */
+        /* --- 1. PALET WARNA (CODM THEME) --- */
         :root {
-            --codm-green: #50b748; 
-            --codm-gold: #ff9c00;  
-            --bg-dark: #050505;    
-            --bg-panel: rgba(20, 24, 28, 0.95); 
+            --codm-green: #50b748; /* Hijau Khas Modern Warfare */
+            --codm-gold: #ff9c00;  /* Warna Emas Highlight/Elite */
+            --bg-dark: #050505;    /* Hitam Pekat */
+            --bg-panel: rgba(20, 24, 28, 0.95); /* Panel Semi-Transparan */
         }
 
         /* --- 2. GLOBAL STYLES --- */
@@ -23,10 +23,10 @@
         
         body {
             background-color: var(--bg-dark);
-            /* Pattern Grid */
+            /* Pattern Grid Halus ala Tactical Map */
             background-image: 
-                linear-gradient(rgba(80, 183, 72, 0.03) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(80, 183, 72, 0.03) 1px, transparent 1px);
+                linear-gradient(rgba(80, 183, 72, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(80, 183, 72, 0.05) 1px, transparent 1px);
             background-size: 30px 30px; 
             color: #e0e0e0;
             font-family: 'Rajdhani', sans-serif;
@@ -35,10 +35,10 @@
             align-items: center;
             min-height: 100vh;
             margin: 0;
-            padding: 15px;
+            padding: 15px; /* Padding agar tidak mepet di layar HP */
         }
 
-        /* --- 3. MAIN CONTAINER --- */
+        /* --- 3. CONTAINER UTAMA (PANEL) --- */
         .container {
             background: var(--bg-panel);
             width: 100%;
@@ -46,11 +46,25 @@
             padding: 40px 30px;
             border: 1px solid #333;
             position: relative;
-            box-shadow: 0 0 25px rgba(80, 183, 72, 0.1);
-            clip-path: polygon(20px 0, 100% 0, 100% calc(100% - 20px), calc(100% - 20px) 100%, 0 100%, 0 20px);
+            box-shadow: 0 0 30px rgba(80, 183, 72, 0.15);
+            
+            /* Animasi Muncul Perlahan (Fade In) */
+            animation: fadeIn 0.8s ease-out;
+
+            /* Potongan Sudut (Angular Style) */
+            clip-path: polygon(
+                20px 0, 100% 0, 
+                100% calc(100% - 20px), calc(100% - 20px) 100%, 
+                0 100%, 0 20px
+            );
         }
 
-        /* Garis Dekorasi */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Garis Dekorasi Atas & Bawah (Aksen Hijau) */
         .container::before {
             content: ''; position: absolute; top: 0; left: 0; width: 100px; height: 3px;
             background: var(--codm-green); box-shadow: 0 0 10px var(--codm-green);
@@ -65,4 +79,294 @@
             text-align: center; 
             margin-bottom: 25px; 
             font-family: 'Orbitron', sans-serif;
-            font-size
+            font-size: 1.8rem;
+            color: #fff;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-shadow: 0 0 15px rgba(80, 183, 72, 0.6);
+            transition: 0.3s;
+            cursor: default;
+        }
+        h2 i { color: var(--codm-green); margin-right: 10px; transition: 0.3s; }
+        
+        /* Efek Hover Glitch pada Judul */
+        h2:hover { text-shadow: 3px 0 var(--codm-gold), -3px 0 var(--codm-green); }
+        h2:hover i { color: var(--codm-gold); text-shadow: 0 0 15px var(--codm-gold); }
+
+        label {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.75rem;
+            color: var(--codm-green);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        /* --- 5. FORM INPUTS --- */
+        .form-group { margin-bottom: 15px; }
+        
+        /* Class untuk layout bersebelahan di Desktop */
+        .dual-column { display: flex; gap: 15px; }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 14px;
+            background: #0b0c10;
+            border: 1px solid #333;
+            color: #fff;
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: 0.3s;
+            outline: none;
+            /* Potongan Sudut Input */
+            clip-path: polygon(0 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%);
+        }
+
+        /* Efek Fokus (Saat mengetik) */
+        input:focus, select:focus, textarea:focus {
+            border-color: var(--codm-green);
+            box-shadow: 0 0 15px rgba(80, 183, 72, 0.25) inset;
+            color: var(--codm-green);
+        }
+
+        input::placeholder, textarea::placeholder { color: #555; font-size: 0.9rem; }
+        textarea { resize: none; height: 100px; }
+
+        /* --- 6. BUTTON (Tombol Kirim) --- */
+        button {
+            width: 100%;
+            padding: 16px;
+            border: none;
+            background: var(--codm-green);
+            color: #000;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 900;
+            font-size: 1.1rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            cursor: pointer;
+            transition: 0.3s;
+            clip-path: polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px);
+            margin-top: 10px;
+        }
+
+        /* Efek Hover Tombol (Berubah jadi Emas) */
+        button:hover { 
+            background: var(--codm-gold); 
+            box-shadow: 0 0 25px var(--codm-gold); 
+            transform: translateY(-2px);
+            color: #000;
+        }
+        button:disabled { background: #333; color: #777; cursor: not-allowed; box-shadow: none; transform: none; }
+
+        /* --- 7. UTILITIES (Select Box & Link) --- */
+        .user-select-container {
+            border: 1px solid #333;
+            background: rgba(80, 183, 72, 0.05); /* Hijau sangat tipis */
+            padding: 15px;
+            margin-bottom: 20px;
+            position: relative;
+        }
+        .user-select-container::before {
+            content: 'DATABASE ACCESS';
+            position: absolute; top: -8px; left: 10px;
+            background: var(--bg-dark); 
+            padding: 0 5px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.6rem;
+            color: var(--codm-green);
+        }
+
+        /* Loader Animation */
+        .loader { 
+            display: none; text-align: center; margin-top: 15px; 
+            font-family: 'Orbitron', sans-serif; font-size: 0.8rem; 
+            color: var(--codm-green); animation: blink 1s infinite; 
+        }
+        @keyframes blink { 50% { opacity: 0.5; } }
+        
+        /* Footer Link */
+        .back-link { text-align: center; margin-top: 25px; }
+        .back-link a { color: #666; text-decoration: none; font-size: 0.85rem; transition: 0.3s; }
+        .back-link a:hover { color: var(--codm-green); text-shadow: 0 0 8px var(--codm-green); }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #0b0c10; }
+        ::-webkit-scrollbar-thumb { background: #333; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--codm-green); }
+
+        /* --- 8. MOBILE OPTIMIZATION (PENTING) --- */
+        @media (max-width: 600px) {
+            .container { 
+                padding: 30px 20px; /* Padding dikurangi */
+                width: 100%; 
+            }
+            h2 { font-size: 1.4rem; margin-bottom: 20px; }
+            label { font-size: 0.7rem; }
+            input, select, textarea, button { font-size: 0.95rem; }
+            
+            /* Trik agar Nickname & ID jadi Atas-Bawah di HP */
+            .dual-column { 
+                flex-direction: column; 
+                gap: 15px; 
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2><i class="fas fa-crosshairs"></i> FCN CHECK-IN</h2>
+
+    <div class="user-select-container">
+        <label><i class="fas fa-database"></i> LOAD PLAYER DATA</label>
+        <select id="existingUser" onchange="fillData()">
+            <option value="">[ SELECT EXISTING PROFILE ]</option>
+            <option disabled>CONNECTING TO SERVER...</option>
+        </select>
+    </div>
+
+    <form name="submit-to-google-sheet">
+        <div class="form-group">
+            <label>NAMA</label>
+            <input type="text" name="Nama" id="nama" placeholder="NAMA ASLI / PANGGILAN" required autocomplete="off">
+        </div>
+        
+        <div class="form-group dual-column">
+            <div style="flex: 1;">
+                <label>IGN (NICKNAME)</label>
+                <input type="text" name="Nickname" id="nickname" placeholder="FCN Nickname" required autocomplete="off">
+            </div>
+            <div style="flex: 1;">
+                <label>OpenID (PlayerID)</label>
+                <input type="number" name="OpenID" id="openid" placeholder="UID: 6742xxxx" required autocomplete="off">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>NOMOR WHATSAPP</label>
+            <input type="number" name="No WA" id="wa" placeholder="081xxxxx" required autocomplete="off">
+        </div>
+
+        <div class="form-group">
+            <label>SERVER REGION (DOMISILI)</label>
+            <select name="Domisili" id="provinsi" required>
+                <option value="">[ SELECT LOCATION ]</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>STATUS REPORT</label>
+            <textarea name="Keterangan" placeholder="HADIR / IZIN / SAKIT / OUT CLAN"></textarea>
+        </div>
+
+        <button type="submit" id="btnKirim">DEPLOY DATA</button>
+        <div class="loader" id="loader"><i class="fas fa-radar fa-spin"></i> UPLOADING TO MAINFRAME...</div>
+    </form>
+    
+    <div class="back-link">
+        <a href="/">&lt; RETURN TO LOBBY</a>
+    </div>
+</div>
+
+<script>
+    // --- SCRIPT LOGIC (Tanpa Audio) ---
+    const scriptURL = 'https://script.google.com/macros/s/AKfycbw6xMH_uyUxvXjSt0cLBIUlgmjNx8u-xf4QMDoB4PHxZALBgqxpy6xw_pozzDd7M7iXmQ/exec';
+    
+    const form = document.forms['submit-to-google-sheet'];
+    const btnKirim = document.getElementById('btnKirim');
+    const loader = document.getElementById('loader');
+    const existingUserSelect = document.getElementById('existingUser');
+
+    // DATA PROVINSI
+    const provinsiList = [
+        "Aceh", "Sumatera Utara", "Sumatera Barat", "Riau", "Jambi", "Sumatera Selatan", "Bengkulu", "Lampung", "Kepulauan Bangka Belitung", "Kepulauan Riau",
+        "DKI Jakarta", "Jawa Barat", "Jawa Tengah", "DI Yogyakarta", "Jawa Timur", "Banten",
+        "Bali", "Nusa Tenggara Barat", "Nusa Tenggara Timur",
+        "Kalimantan Barat", "Kalimantan Tengah", "Kalimantan Selatan", "Kalimantan Timur", "Kalimantan Utara",
+        "Sulawesi Utara", "Sulawesi Tengah", "Sulawesi Selatan", "Sulawesi Tenggara", "Gorontalo", "Sulawesi Barat",
+        "Maluku", "Maluku Utara", "Papua", "Papua Barat", "Papua Selatan", "Papua Tengah", "Papua Pegunungan", "Papua Barat Daya"
+    ];
+
+    const selectProv = document.getElementById('provinsi');
+    provinsiList.forEach(prov => {
+        let option = document.createElement('option');
+        option.value = prov;
+        option.text = prov.toUpperCase(); 
+        selectProv.appendChild(option);
+    });
+
+    // LOAD DATA USER (AUTOCOMPLETE)
+    let userData = {}; 
+    fetch(scriptURL)
+        .then(response => response.json())
+        .then(users => {
+            existingUserSelect.innerHTML = '<option value="">[ NEW RECRUIT / MANUAL INPUT ]</option>';
+            if (users.length === 0) {
+                 let option = document.createElement('option');
+                 option.text = "NO DATA FOUND";
+                 option.disabled = true;
+                 existingUserSelect.appendChild(option);
+            } else {
+                users.forEach(user => {
+                    let option = document.createElement('option');
+                    option.value = user.openid; 
+                    option.text = `[${user.nickname}] ${user.nama}`; 
+                    existingUserSelect.appendChild(option);
+                    userData[user.openid] = user;
+                });
+            }
+        })
+        .catch(error => {
+            console.error('Error loading users:', error);
+            existingUserSelect.innerHTML = '<option disabled>SERVER ERROR (Check Console)</option>';
+        });
+
+    function fillData() {
+        const selectedOpenID = existingUserSelect.value;
+        if (selectedOpenID && userData[selectedOpenID]) {
+            const data = userData[selectedOpenID];
+            document.getElementById('nama').value = data.nama;
+            document.getElementById('nickname').value = data.nickname;
+            document.getElementById('openid').value = data.openid;
+            document.getElementById('wa').value = data.wa;
+            document.getElementById('provinsi').value = data.domisili;
+        } else {
+            form.reset();
+        }
+    }
+
+    // LOGIKA PENGIRIMAN DATA
+    form.addEventListener('submit', e => {
+        e.preventDefault();
+        
+        btnKirim.disabled = true;
+        btnKirim.innerHTML = "TRANSMITTING...";
+        btnKirim.style.background = "#333"; // Tombol jadi gelap saat loading
+        loader.style.display = "block";
+
+        fetch(scriptURL, { method: 'POST', body: new FormData(form)})
+            .then(response => {
+                alert("✅ MISSION ACCOMPLISHED: Data Secured!");
+                form.reset();
+                existingUserSelect.value = ""; 
+                btnKirim.disabled = false;
+                btnKirim.innerHTML = "DEPLOY DATA";
+                btnKirim.style.background = "var(--codm-green)"; // Balik ke Hijau
+                loader.style.display = "none";
+            })
+            .catch(error => {
+                alert("❌ CONNECTION LOST: Check Internet.");
+                console.error('Error!', error.message);
+                btnKirim.disabled = false;
+                btnKirim.innerHTML = "RETRY DEPLOY";
+                loader.style.display = "none";
+            });
+    });
+</script>
+
+</body>
+</html>
