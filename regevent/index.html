@@ -184,8 +184,8 @@
 </div>
 
 <script>
-    // MASUKKAN URL WEB APP GOOGLE SCRIPT KAMU DISINI
-    const scriptURL = 'https://script.google.com/macros/s/AKfycbxFW5xIb3owlwMZ4wtOGGK9manXNY1IKxZOhJ53hsWcwYy0zX6wNez3paulrn-g72lF/exec';
+    // URL WEB APP KAMU SUDAH TERTANAM DISINI:
+    const scriptURL = 'https://script.google.com/macros/s/AKfycbxahJR9x-Ylc3iv9N4FExA6NpFYDaER7PJt_1zv1j3CdEESOJmOYrj8YDnio8LIizt3Fw/exec';
 
     const eventSelect = document.getElementById('eventSelect');
     const statusText = document.getElementById('connectionStatus');
@@ -202,7 +202,6 @@
     ];
 
     // --- 1. FETCH EVENTS DARI GOOGLE SHEET SAAT LOAD ---
-    // Ini rahasianya: Script akan minta daftar event ke Spreadsheet
     function loadEvents() {
         fetch(scriptURL + '?action=getEvents')
             .then(response => response.json())
