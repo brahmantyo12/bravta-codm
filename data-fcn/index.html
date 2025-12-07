@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ATTENDANCE - FalconIDN Clan</title>
-    <link rel="icon" href="../favicon.png" type="image/x-icon">
+    <link rel="icon" href="favicon.png" type="image/x-icon">
     
     <link href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@400;700&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"/>
@@ -93,7 +93,7 @@
             100% { opacity: 0; } /* Memudar cepat */
         }
 
-        /* --- 4. TYPOGRAPHY & FORM ELEMENTS (SAMA SEPERTI SEBELUMNYA) --- */
+        /* --- 4. TYPOGRAPHY & FORM ELEMENTS --- */
         h2 { 
             text-align: center; margin-bottom: 30px; 
             font-family: 'Roboto Condensed', sans-serif; font-weight: 700; font-size: 2rem; color: #ffffff; 
@@ -166,6 +166,8 @@
             <textarea name="Keterangan" placeholder="HADIR / IZIN / SAKIT / OUT CLAN"></textarea>
         </div>
 
+        <input type="text" name="honeypot" id="honeypot" style="display:none" autocomplete="off">
+
         <button type="submit" id="btnKirim">DEPLOY DATA</button>
         <div class="loader" id="loader"><i class="fas fa-radiation fa-spin"></i> TRANSMITTING DATA...</div>
     </form>
@@ -177,39 +179,72 @@
 
 <script>
     // --- SCRIPT LOGIC ---
-    const scriptURL = 'https://script.google.com/macros/s/AKfycbw6xMH_uyUxvXjSt0cLBIUlgmjNx8u-xf4QMDoB4PHxZALBgqxpy6xw_pozzDd7M7iXmQ/exec';
+    // URL Web App kamu sudah dimasukkan di sini:
+    const scriptURL = 'https://script.google.com/macros/s/AKfycbymIg8Mo__BdudgTrKr2kuBP_77ilfXZjrqg6qdx88aVsqhLoZw2s6-Y2oESXuiUMLgGA/exec';
     
     const form = document.forms['submit-to-google-sheet'];
     const btnKirim = document.getElementById('btnKirim');
     const loader = document.getElementById('loader');
     const existingUserSelect = document.getElementById('existingUser');
-    // Ambil referensi ke container utama untuk efek getar
     const mainContainer = document.getElementById('mainContainer');
 
-    // DATA PROVINSI (TETAP SAMA)
+    // DATA PROVINSI
     const provinsiList = ["Aceh", "Sumatera Utara", "Sumatera Barat", "Riau", "Jambi", "Sumatera Selatan", "Bengkulu", "Lampung", "Kepulauan Bangka Belitung", "Kepulauan Riau", "DKI Jakarta", "Jawa Barat", "Jawa Tengah", "DI Yogyakarta", "Jawa Timur", "Banten", "Bali", "Nusa Tenggara Barat", "Nusa Tenggara Timur", "Kalimantan Barat", "Kalimantan Tengah", "Kalimantan Selatan", "Kalimantan Timur", "Kalimantan Utara", "Sulawesi Utara", "Sulawesi Tengah", "Sulawesi Selatan", "Sulawesi Tenggara", "Gorontalo", "Sulawesi Barat", "Maluku", "Maluku Utara", "Papua", "Papua Barat", "Papua Selatan", "Papua Tengah", "Papua Pegunungan", "Papua Barat Daya"];
     const selectProv = document.getElementById('provinsi');
     provinsiList.forEach(prov => { let option = document.createElement('option'); option.value = prov; option.text = prov.toUpperCase(); selectProv.appendChild(option); });
 
-    // LOAD USER (TETAP SAMA)
+    // LOAD USER DATA
     let userData = {}; 
-    fetch(scriptURL).then(response => response.json()).then(users => { existingUserSelect.innerHTML = '<option value="">[ SELECT EXISTING PROFILE ]</option>'; if (users.length === 0) { let option = document.createElement('option'); option.text = "NO DATA FOUND"; option.disabled = true; existingUserSelect.appendChild(option); } else { users.forEach(user => { let option = document.createElement('option'); option.value = user.openid; option.text = `[${user.nickname}] ${user.nama}`; existingUserSelect.appendChild(option); userData[user.openid] = user; }); } }).catch(error => { console.error('Error loading users:', error); existingUserSelect.innerHTML = '<option disabled>SERVER ERROR</option>'; });
-    function fillData() { const selectedOpenID = existingUserSelect.value; if (selectedOpenID && userData[selectedOpenID]) { const data = userData[selectedOpenID]; document.getElementById('nama').value = data.nama; document.getElementById('nickname').value = data.nickname; document.getElementById('openid').value = data.openid; document.getElementById('wa').value = data.wa; document.getElementById('provinsi').value = data.domisili; } else { form.reset(); } }
+    fetch(scriptURL)
+        .then(response => response.json())
+        .then(users => { 
+            existingUserSelect.innerHTML = '<option value="">[ SELECT EXISTING PROFILE ]</option>'; 
+            if (users.length === 0) { 
+                let option = document.createElement('option'); option.text = "NO DATA FOUND"; option.disabled = true; existingUserSelect.appendChild(option); 
+            } else { 
+                users.forEach(user => { 
+                    let option = document.createElement('option'); 
+                    option.value = user.openid; 
+                    option.text = `[${user.nickname}] ${user.nama}`; 
+                    existingUserSelect.appendChild(option); 
+                    userData[user.openid] = user; 
+                }); 
+            } 
+        })
+        .catch(error => { 
+            console.error('Error loading users:', error); 
+            existingUserSelect.innerHTML = '<option disabled>SERVER ERROR</option>'; 
+        });
+
+    // FUNGSI ISI OTOMATIS (AUTOFILL)
+    function fillData() { 
+        const selectedOpenID = existingUserSelect.value; 
+        if (selectedOpenID && userData[selectedOpenID]) { 
+            const data = userData[selectedOpenID]; 
+            document.getElementById('nama').value = data.nama; 
+            document.getElementById('nickname').value = data.nickname; 
+            document.getElementById('openid').value = data.openid; 
+            document.getElementById('provinsi').value = data.domisili; 
+            
+            // SECURITY 3: PRIVASI WA
+            // Kita kosongkan kolom WA agar user mengisi manual (tidak terekspos dari server)
+            document.getElementById('wa').value = ""; 
+            document.getElementById('wa').placeholder = "Isi ulang demi privasi...";
+        } else { 
+            form.reset(); 
+            document.getElementById('wa').placeholder = "081xxxxx";
+        } 
+    }
 
     // --- LOGIKA PENGIRIMAN DENGAN EFEK VISUAL ---
     form.addEventListener('submit', e => {
         e.preventDefault();
         
         // 1. AKTIFKAN EFEK MEDAN PERANG
-        // Tambahkan class 'deploying' untuk memicu animasi getar & kilatan
         mainContainer.classList.add('deploying');
-        
-        // Hapus class tersebut setelah animasi selesai (0.5 detik) agar bisa dipicu lagi nanti
-        setTimeout(() => {
-            mainContainer.classList.remove('deploying');
-        }, 500);
+        setTimeout(() => { mainContainer.classList.remove('deploying'); }, 500);
 
-        // 2. PROSES PENGIRIMAN DATA (SEPERTI BIASA)
+        // 2. PROSES PENGIRIMAN
         btnKirim.disabled = true;
         btnKirim.innerHTML = "TRANSMITTING...";
         btnKirim.style.background = "#151515"; 
@@ -226,6 +261,7 @@
                 btnKirim.innerHTML = "DEPLOY DATA";
                 btnKirim.removeAttribute("style");
                 loader.style.display = "none";
+                document.getElementById('wa').placeholder = "081xxxxx"; // Reset placeholder
             })
             .catch(error => {
                 alert("❌ CONNECTION LOST: Check Internet.");
