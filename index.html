@@ -3,7 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bravta12 - CoDM</title>
+    <meta name="description" content="Portofolio Gaming Bravta12 - CoDM Komunitas Jawa Barat & FalconIDNest. Info Turnamen, Download Sertifikat, dan Livestream.">
+    <meta name="theme-color" content="#02060f">
+
+    <title>Bravta12 - CoDM Portfolio</title>
     <link rel="icon" href="header-bg.png" type="image/x-icon">
     
     <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -41,6 +44,7 @@
             position: relative;
             background-color: rgba(0,0,0,0.3);
             min-height: 100vh;
+            box-shadow: 0 0 50px rgba(0,0,0,0.5); 
         }
 
         /* --- HEADER GAMBAR UTUH --- */
@@ -72,15 +76,13 @@
             letter-spacing: 2px;
         }
 
-        /* Container untuk Bio */
         .bio-container {
             display: flex;
             flex-direction: column;
-            gap: 4px; /* Sedikit jarak antar baris */
+            gap: 4px;
             margin-bottom: 30px;
         }
 
-        /* Baris 1: CoDM Komunitas */
         .bio-main {
             font-size: 1.3rem;
             font-weight: 600;
@@ -89,16 +91,11 @@
             line-height: 1.2;
         }
 
-        /* Baris 2: FalconIDNest (Gaya disamakan dengan .bio-main) */
         .bio-sub {
-            /* Ukuran tetap kecil agar tidak terlalu lebar */
             font-size: 0.9rem; 
-            
-            /* Warna & Style disamakan dengan baris atas */
             font-weight: 600;
             color: #d0faff; 
             text-shadow: 0 0 5px rgba(0, 243, 255, 0.5);
-            
             letter-spacing: 0.5px;
         }
 
@@ -113,7 +110,7 @@
         .section-header {
             font-size: 1.1rem;
             font-weight: 700;
-            margin: 20px 0 10px 0;
+            margin: 25px 0 10px 0; 
             text-transform: uppercase;
             color: var(--ice-glow);
             letter-spacing: 3px;
@@ -134,20 +131,38 @@
             align-items: center;
             justify-content: center; 
             gap: 15px; 
-            transition: all 0.3s ease;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); 
             border: 1px solid rgba(0, 243, 255, 0.3);
             box-shadow: 0 0 10px rgba(0, 243, 255, 0.05);
             text-transform: uppercase; 
             text-align: center;
             backdrop-filter: blur(5px);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .link-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+            transition: 0.5s;
+        }
+
+        .link-btn:hover::before {
+            left: 100%;
         }
 
         .link-btn:hover {
-            background-color: rgba(0, 243, 255, 0.15); 
+            background-color: rgba(0, 243, 255, 0.2); 
             border-color: var(--ice-cyan);
-            box-shadow: 0 0 20px rgba(0, 243, 255, 0.4);
-            transform: translateY(-2px);
+            box-shadow: 0 0 25px rgba(0, 243, 255, 0.5);
+            transform: translateY(-3px) scale(1.02); 
             letter-spacing: 1px;
+            color: #fff;
         }
 
         .btn-content {
@@ -162,7 +177,7 @@
             font-size: 0.85rem;
             font-weight: 400;
             color: var(--ice-cyan);
-            opacity: 0.8;
+            opacity: 0.9;
             margin-top: 2px;
             letter-spacing: 0.5px;
         }
@@ -171,6 +186,11 @@
             font-size: 1.6rem; 
             color: var(--ice-cyan);
             filter: drop-shadow(0 0 5px var(--ice-cyan));
+            transition: transform 0.3s;
+        }
+        
+        .link-btn:hover .icon-left {
+            transform: rotate(-10deg);
         }
 
         /* --- FOOTER --- */
@@ -180,6 +200,7 @@
             justify-content: center;
             gap: 30px;
             padding-top: 20px;
+            padding-bottom: 20px;
             border-top: 1px solid rgba(255, 255, 255, 0.1);
             width: 80%;
             margin-left: auto;
@@ -191,10 +212,11 @@
             font-size: 1.8rem;
             text-decoration: none;
             transition: all 0.3s;
+            position: relative;
         }
 
         .footer-icons a:hover {
-            transform: scale(1.2);
+            transform: scale(1.2) translateY(-3px);
             color: var(--ice-cyan);
             text-shadow: 0 0 15px var(--ice-cyan);
         }
@@ -205,7 +227,7 @@
 
     <div class="container">
         
-        <img src="header-bg.png" alt="Bravta Header" class="hero-image">
+        <img src="header-bg.png" alt="Bravta Header CoDM Character" class="hero-image">
 
         <div class="profile-info">
             <h1 class="username">FCN Bravta遖></h1>
@@ -220,7 +242,7 @@
 
             <div class="section-header" style="margin-top: 0;">:: My Content ::</div>
 
-            <a href="https://youtube.com/@bravta12" class="link-btn">
+            <a href="https://youtube.com/@bravta12" class="link-btn" target="_blank" rel="noopener noreferrer">
                 <i class="fab fa-youtube icon-left"></i>
                 <div class="btn-content">
                     <span>Bravta Wuto: Gaming</span>
@@ -228,7 +250,7 @@
                 </div>
             </a>
 
-            <a href="https://tiktok.com/@bravta12" class="link-btn">
+            <a href="https://tiktok.com/@bravta12" class="link-btn" target="_blank" rel="noopener noreferrer">
                 <i class="fab fa-tiktok icon-left"></i>
                 <div class="btn-content">
                     <span>My Tiktok</span>
@@ -236,26 +258,60 @@
                 </div>
             </a>
 
+            <div class="section-header">:: Tournament & Event ::</div>
+
+            <a href="#" onclick="alert('Link Pendaftaran sedang dipersiapkan. Tunggu info selanjutnya!')" class="link-btn">
+                <i class="fas fa-user-plus icon-left"></i>
+                <div class="btn-content">
+                    <span>Pendaftaran Peserta</span>
+                    <span class="stats">Link Segera Hadir</span>
+                </div>
+            </a>
+
+            <a href="https://forms.gle/8tqVUi5NN7vBLibc6" class="link-btn" target="_blank" rel="noopener noreferrer">
+                <i class="fas fa-award icon-left"></i>
+                <div class="btn-content">
+                    <span>Klaim E-Certificate</span>
+                    <span class="stats">Khusus Juara</span>
+                </div>
+            </a>
+
+            <a href="https://drive.google.com/drive/folders/1XbSauzm5_I4zG1QnwZbhsf5tWrb_bDQz?usp=drive_link" class="link-btn" target="_blank" rel="noopener noreferrer">
+                <i class="fas fa-cloud-download-alt icon-left"></i>
+                <div class="btn-content">
+                    <span>Download E-Certificate</span>
+                    <span class="stats">Public Google Drive</span>
+                </div>
+            </a>
+
+            <a href="https://www.youtube.com/@falconidn" class="link-btn" target="_blank" rel="noopener noreferrer">
+                <i class="fab fa-youtube icon-left"></i>
+                <div class="btn-content">
+                    <span>Livestream Channel</span>
+                    <span class="stats">FalconIDN Official</span>
+                </div>
+            </a>
+
             <div class="section-header">:: Community ::</div>
 
-            <a href="https://chat.whatsapp.com/GsJkV1KepBn1C6IQrA4yVh" class="link-btn">
+            <a href="https://chat.whatsapp.com/GsJkV1KepBn1C6IQrA4yVh" class="link-btn" target="_blank" rel="noopener noreferrer">
                 <i class="fab fa-whatsapp icon-left"></i>
                 <div class="btn-content">
                     <span>CoDM Komunitas Jawa Barat</span>
                 </div>
             </a>
 
-            <a href="https://www.instagram.com/codm_jabar" class="link-btn">
+            <a href="https://www.instagram.com/codm_jabar" class="link-btn" target="_blank" rel="noopener noreferrer">
                 <i class="fab fa-instagram icon-left"></i>
                 <div class="btn-content">
                     <span>Community Instagram</span>
-                    <span class="stats">CoDM Komunitas Jawa Barat</span>
+                    <span class="stats">@codm_jabar</span>
                 </div>
             </a>
 
             <div class="section-header">:: FalconIDNest ::</div>
 
-            <a href="https://wa.me/6281703792075?text=Halo%20saya%20ingin%20join%20clan%20FalconIDN%20CoDM" class="link-btn">
+            <a href="https://wa.me/6281703792075?text=Halo%20saya%20ingin%20join%20clan%20FalconIDN%20CoDM" class="link-btn" target="_blank" rel="noopener noreferrer">
                 <i class="fab fa-whatsapp icon-left"></i>
                 <div class="btn-content">
                     <span>Join Clan FalconIDN</span>
@@ -266,21 +322,21 @@
                 <i class="fas fa-calendar-check icon-left"></i>
                 <div class="btn-content">
                     <span>Absen Member Clan FalconIDN</span>
-                    <span class="stats">Hanya untuk anggota clan CoDM</span>
+                    <span class="stats">Hanya untuk anggota clan</span>
                 </div>
             </a>
 
-            <a href="https://www.instagram.com/falconidn/#" class="link-btn">
+            <a href="https://www.instagram.com/falconidn/#" class="link-btn" target="_blank" rel="noopener noreferrer">
                 <i class="fab fa-instagram icon-left"></i>
                 <div class="btn-content">
                     <span>Community Instagram</span>
-                    <span class="stats">FalconIDN Instagram</span>
+                    <span class="stats">@falconidn</span>
                 </div>
             </a>
 
             <div class="section-header">:: Support & Store ::</div>
 
-            <a href="https://saweria.co/bravta12" class="link-btn">
+            <a href="https://saweria.co/bravta12" class="link-btn" target="_blank" rel="noopener noreferrer">
                 <i class="fas fa-hand-holding-dollar icon-left"></i>
                 <div class="btn-content">
                     <span>Saweria</span>
@@ -291,10 +347,11 @@
                 <i class="fas fa-store icon-left"></i>
                 <div class="btn-content">
                     <span>BTStore12: Aneka Produk</span>
+                    <span class="stats">Coming Soon</span>
                 </div>
             </a>
 
-            <a href="https://g.page/r/CVFLCdaLgS4sEBI" class="link-btn">
+            <a href="https://g.page/r/CVFLCdaLgS4sEBI" class="link-btn" target="_blank" rel="noopener noreferrer">
                 <i class="fas fa-map-marked-alt icon-left"></i>
                 <div class="btn-content">
                     <span>Our location on Gmaps</span>
@@ -304,9 +361,9 @@
         </div>
 
         <div class="footer-icons">
-            <a href="https://api.whatsapp.com/send?phone=6281703792075"><i class="fab fa-whatsapp"></i></a>
-            <a href="https://www.paypal.me/BTStore12"><i class="fas fa-dollar-sign"></i></a>
-            <a href="https://t.me/Bravta12/#"><i class="fab fa-telegram"></i></a>
+            <a href="https://api.whatsapp.com/send?phone=6281703792075" aria-label="WhatsApp" target="_blank" rel="noopener noreferrer"><i class="fab fa-whatsapp"></i></a>
+            <a href="https://www.paypal.me/BTStore12" aria-label="PayPal" target="_blank" rel="noopener noreferrer"><i class="fas fa-dollar-sign"></i></a>
+            <a href="https://t.me/Bravta12/#" aria-label="Telegram" target="_blank" rel="noopener noreferrer"><i class="fab fa-telegram"></i></a>
         </div>
 
     </div>
