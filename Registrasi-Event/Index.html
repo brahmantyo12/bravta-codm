@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EVENT REGISTRATION - FalconIDN</title>
+    <link rel="icon" href="favicon.png" type="image/x-icon">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@400;700&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"/>
+    
+    <style>
+        /* --- CONFIG & THEME (Sama seperti sebelumnya) --- */
+        :root {
+            --mw-bg: #0a0a0a;
+            --mw-panel: #141414;
+            --mw-text: #cccccc;
+            --mw-accent: #789f55; 
+            --mw-flash: #ffaa00;  
+            --mw-border: #333333;
+        }
+
+        * { box-sizing: border-box; }
+        
+        body {
+            background-color: var(--mw-bg);
+            color: var(--mw-text);
+            font-family: 'Roboto', sans-serif;
+            display: flex; justify-content: center; align-items: center;
+            min-height: 100vh; margin: 0; padding: 20px;
+            overflow-x: hidden; position: relative;
+        }
+
+        /* --- VISUAL EFFECTS --- */
+        body::before { /* Scanline */
+            content: ""; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: repeating-linear-gradient(0deg, rgba(0,0,0,0.1) 0px, rgba(0,0,0,0.1) 1px, transparent 1px, transparent 2px);
+            pointer-events: none; z-index: 1; animation: scanlineMove 10s linear infinite; opacity: 0.3;
+        }
+        body::after { /* Noise */
+            content: ""; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.05'/%3E%3C/svg%3E");
+            pointer-events: none; z-index: 2; opacity: 0.4;
+        }
+
+        /* --- CONTAINER --- */
+        .container {
+            background: var(--mw-panel);
+            width: 100%; max-width: 600px; /* Sedikit lebih lebar untuk input tim */
+            padding: 35px;
+            border-top: 4px solid var(--mw-accent);
+            border-bottom: 1px solid var(--mw-border);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            position: relative; z-index: 10;
+        }
+        .container.deploying { animation: rumble 0.5s cubic-bezier(.36,.07,.19,.97) both; }
+        .container.deploying::after {
+            content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+            background: var(--mw-flash); mix-blend-mode: overlay; pointer-events: none;
+            animation: muzzle-flash 0.5s ease-out both;
+        }
+
+        /* --- ANIMATION KEYFRAMES --- */
+        @keyframes scanlineMove { from { background-position: 0 0; } to { background-position: 0 100%; } }
+        @keyframes rumble {
+            10%, 90% { transform: translate3d(-3px, 0, 0) rotate(-1deg); }
+            20%, 80% { transform: translate3d(5px, 0, 0) rotate(1deg); }
+            30%, 50%, 70% { transform: translate3d(-6px, -2px, 0) rotate(-2deg); border-top-color: var(--mw-flash); }
+            40%, 60% { transform: translate3d(6px, 2px, 0) rotate(2deg); }
+        }
+        @keyframes muzzle-flash { 0% { opacity: 0; } 10% { opacity: 0.8; } 100% { opacity: 0; } }
+
+        /* --- FORM ELEMENTS --- */
+        h2 { 
+            text-align: center; margin-bottom: 10px; 
+            font-family: 'Roboto Condensed', sans-serif; font-weight: 700; font-size: 2rem; color: #ffffff; 
+            text-transform: uppercase; letter-spacing: 2px;
+        }
+        .event-subtitle {
+            text-align: center; color: var(--mw-accent); font-family: 'Roboto Condensed', sans-serif;
+            font-size: 1.2rem; margin-bottom: 30px; border-bottom: 1px solid var(--mw-border); padding-bottom: 15px; letter-spacing: 1px;
+        }
+        
+        label { font-family: 'Roboto Condensed', sans-serif; font-size: 0.85rem; color: var(--mw-accent); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; display: block; font-weight: 700; }
+        .form-group { margin-bottom: 20px; }
+        .form-section-title {
+            color: #fff; background: rgba(255,255,255,0.05); padding: 8px 10px; margin: 25px 0 15px 0;
+            font-family: 'Roboto Condensed', sans-serif; letter-spacing: 1px; font
