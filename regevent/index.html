@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EVENT REGISTRATION - BRAVTA</title>
+    <title>EVENT REGISTRATION</title>
     <link rel="icon" href="favicon.png" type="image/x-icon">
     
     <link href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@400;700&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
@@ -197,4 +197,104 @@
     // Elements Player 2 untuk Toggle Required
     const p2Inputs = [
         document.getElementById('p2_nick'), 
-        document.getElementById('p2_uid'),
+        document.getElementById('p2_uid'), 
+        document.getElementById('p2_openid')
+    ];
+
+    // --- 1. FETCH EVENTS DARI GOOGLE SHEET SAAT LOAD ---
+    // Ini rahasianya: Script akan minta daftar event ke Spreadsheet
+    function loadEvents() {
+        fetch(scriptURL + '?action=getEvents')
+            .then(response => response.json())
+            .then(events => {
+                eventSelect.innerHTML = '<option value="">[ SELECT MISSION TARGET ]</option>';
+                
+                if (events.length === 0) {
+                    let opt = document.createElement('option');
+                    opt.text = "NO ACTIVE EVENTS";
+                    eventSelect.appendChild(opt);
+                    statusText.innerText = "NO MISSIONS AVAILABLE.";
+                } else {
+                    events.forEach(evt => {
+                        let opt = document.createElement('option');
+                        opt.value = evt;
+                        opt.text = evt;
+                        eventSelect.appendChild(opt);
+                    });
+                    statusText.innerText = "SYSTEM ONLINE. READY FOR INPUT.";
+                    statusText.style.color = "#789f55";
+                    btnKirim.disabled = false;
+                    btnKirim.innerHTML = "CONFIRM REGISTRATION";
+                }
+            })
+            .catch(error => {
+                console.error('Error loading events:', error);
+                statusText.innerText = "CONNECTION FAILED. REFRESH PAGE.";
+                statusText.style.color = "red";
+                eventSelect.innerHTML = '<option>ERROR LOADING EVENTS</option>';
+            });
+    }
+
+    // Jalankan fungsi load saat halaman dibuka
+    loadEvents();
+
+    // --- 2. LOGIC TOGGLE SOLO / TEAM ---
+    function toggleFormMode(isTeam) {
+        if (isTeam) {
+            // Tampilkan Field Team & P2
+            teamNameField.classList.remove('hidden');
+            player2Area.classList.remove('hidden');
+            
+            // Set Required
+            inputTeamName.setAttribute('required', 'true');
+            p2Inputs.forEach(el => el.setAttribute('required', 'true'));
+        } else {
+            // Sembunyikan
+            teamNameField.classList.add('hidden');
+            player2Area.classList.add('hidden');
+            
+            // Hapus Required & Bersihkan Input
+            inputTeamName.removeAttribute('required');
+            inputTeamName.value = "";
+            
+            p2Inputs.forEach(el => {
+                el.removeAttribute('required');
+                el.value = "";
+            });
+        }
+    }
+
+    // --- 3. SUBMIT DATA ---
+    const form = document.forms['submit-to-google-sheet'];
+    const mainContainer = document.getElementById('mainContainer');
+    const loader = document.getElementById('loader');
+
+    form.addEventListener('submit', e => {
+        e.preventDefault();
+        
+        mainContainer.classList.add('deploying');
+        setTimeout(() => mainContainer.classList.remove('deploying'), 500);
+
+        btnKirim.disabled = true;
+        btnKirim.innerHTML = "PROCESSING...";
+        loader.style.display = "block";
+
+        fetch(scriptURL, { method: 'POST', body: new FormData(form)})
+            .then(response => {
+                alert("✅ REGISTRATION CONFIRMED!\nGood luck, Soldier.");
+                form.reset();
+                toggleFormMode(false); // Reset ke mode solo
+                loader.style.display = "none";
+                btnKirim.disabled = false;
+                btnKirim.innerHTML = "CONFIRM REGISTRATION";
+            })
+            .catch(error => {
+                alert("❌ ERROR: Connection Lost.");
+                loader.style.display = "none";
+                btnKirim.disabled = false;
+            });
+    });
+</script>
+
+</body>
+</html>
