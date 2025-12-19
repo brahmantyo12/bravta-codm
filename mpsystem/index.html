@@ -46,8 +46,9 @@
             --ice-cyan: #00f3ff;
             --deep-blue: #0056b3;
             --bg-dark: #02060f;
-            --match-bg: rgba(2, 6, 15, 0.95); /* Lebih solid agar tulisan jelas */
+            --match-bg: #0f172a;
             --line-color: #475569;
+            --line-active: #00f3ff;
         }
 
         body {
@@ -56,20 +57,18 @@
             color: var(--ice-cyan);
             font-family: 'Rajdhani', sans-serif;
             min-height: 100vh;
-            display: flex;
-            flex-direction: column;
+            display: flex; flex-direction: column;
         }
 
-        /* --- Scrollbar Custom --- */
-        ::-webkit-scrollbar { width: 10px; height: 10px; }
+        /* --- Scrollbar --- */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
         ::-webkit-scrollbar-track { background: #02060f; }
-        ::-webkit-scrollbar-thumb { background: #0056b3; border-radius: 5px; border: 2px solid #02060f; }
-        ::-webkit-scrollbar-thumb:hover { background: #00f3ff; }
+        ::-webkit-scrollbar-thumb { background: #0056b3; border-radius: 4px; }
 
-        /* --- BRACKET STRUCTURE (FIXED) --- */
+        /* --- BRACKET LAYOUT --- */
         .tournament-container { 
             display: flex; 
-            padding: 60px 40px; /* Padding lebih besar agar tidak kepotong */
+            padding: 50px 20px;
             margin: 0 auto;
         }
         
@@ -77,75 +76,115 @@
             display: flex; 
             flex-direction: column; 
             justify-content: space-around; 
-            width: 280px; /* Lebar match diperluas */
-            margin-right: 60px; /* Jarak antar ronde diperluas */
+            width: 260px; 
+            margin-right: 40px; /* Jarak antar ronde untuk garis */
         }
         
         .round-title { 
-            text-align: center; 
-            color: #fff; 
-            margin-bottom: 30px; 
-            font-weight: bold; 
-            border-bottom: 2px solid var(--ice-cyan); 
-            letter-spacing: 2px; 
-            padding-bottom: 5px;
+            text-align: center; color: #fff; margin-bottom: 20px; font-weight: bold; 
+            border-bottom: 2px solid var(--ice-cyan); letter-spacing: 2px; padding-bottom: 5px;
             text-transform: uppercase;
         }
         
+        /* --- MATCH CARD --- */
         .match {
             background-color: var(--match-bg);
             border: 1px solid var(--line-color);
-            border-radius: 8px; 
-            padding: 10px; 
-            margin: 15px 0; /* Margin vertikal antar match */
+            border-radius: 6px; 
+            padding: 8px; 
             position: relative; 
-            cursor: default; 
-            transition: all 0.2s;
+            margin: 10px 0;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
             z-index: 10;
         }
         .match.clickable:hover { 
-            border-color: var(--ice-cyan); 
-            cursor: pointer; 
-            box-shadow: 0 0 20px rgba(0, 243, 255, 0.3); 
-            transform: scale(1.02);
+            border-color: var(--ice-cyan); cursor: pointer; 
+            box-shadow: 0 0 15px rgba(0, 243, 255, 0.2); 
         }
 
-        .team { display: flex; justify-content: space-between; align-items: center; padding: 6px 8px; border-radius: 4px; }
-        .team-name { font-weight: 600; color: #cbd5e1; max-width: 180px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .team-score { font-family: monospace; font-size: 1.2rem; color: #fbbf24; font-weight: bold; background: rgba(0,0,0,0.6); padding: 0 10px; border-radius: 4px; min-width: 35px; text-align: center; }
+        .team { display: flex; justify-content: space-between; align-items: center; padding: 4px 6px; border-radius: 4px; }
+        .team-name { font-weight: 600; color: #94a3b8; max-width: 170px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .team-score { font-family: monospace; font-size: 1.1rem; color: #fbbf24; font-weight: bold; background: rgba(0,0,0,0.4); padding: 0 8px; border-radius: 3px; min-width: 30px; text-align: center; }
 
-        /* Winner Styles */
-        .winner .team-name { color: var(--ice-cyan); text-shadow: 0 0 10px var(--ice-cyan); }
-        .winner-row { background: linear-gradient(90deg, rgba(0,243,255,0.15), transparent); border-left: 3px solid var(--ice-cyan); }
+        .winner .team-name { color: var(--ice-cyan); text-shadow: 0 0 8px rgba(0,243,255,0.6); }
+        .winner-row { background: linear-gradient(90deg, rgba(0,243,255,0.1), transparent); border-left: 2px solid var(--ice-cyan); }
 
-        /* Lines (Connecting Lines) */
-        .match::after { content: ''; position: absolute; width: 30px; height: 2px; background: var(--line-color); right: -31px; top: 50%; z-index: 0; }
-        .round:last-child .match::after { display: none; }
+        /* --- GARIS PENGHUBUNG (FIXED LOGIC) --- */
         
-        /* Fork Lines */
-        .match-pair-top::before { 
-            content: ''; position: absolute; 
-            width: 30px; height: calc(50% + 15px); /* +15px kompensasi margin */
-            border-right: 2px solid var(--line-color); 
-            right: -31px; top: 50%; z-index: 0; 
+        /* 1. Garis keluar Horizontal (semua match kecuali final) */
+        .match::before {
+            content: ''; position: absolute;
+            right: -20px; top: 50%;
+            width: 20px; height: 2px;
+            background: var(--line-color);
+            z-index: 0;
+            display: none; /* Default hidden */
         }
-        .match-pair-bottom::before { 
-            content: ''; position: absolute; 
-            width: 30px; height: calc(50% + 15px); 
-            border-right: 2px solid var(--line-color); 
-            right: -31px; bottom: 50%; z-index: 0; 
+        .has-connector::before { display: block; } /* Hanya muncul jika bukan final */
+
+        /* 2. Garis Vertikal (Siku) */
+        
+        /* Untuk Tim ATAS (Genap): Garis turun ke bawah */
+        .connect-down::after {
+            content: ''; position: absolute;
+            right: -22px; /* Geser sedikit agar nyambung sama garis horizontal */
+            top: 50%;
+            width: 2px;
+            height: 100%; /* Turun ke bawah, menyambung ke tengah gap */
+            background: var(--line-color);
+            /* Trik agar garisnya berhenti di tengah-tengah antar match, 
+               kita butuh CSS calc atau structure parent yg lebih kompleks. 
+               Untuk simplifikasi visual, kita pakai border-right pada pseudo element */
+            height: calc(50% + 20px); /* Estimasi panjang ke bawah */
+            border-right: 2px solid var(--line-color);
+            transform: translateY(50%); /* Geser titik mulai */
+            display: none; /* Ganti logic di bawah */
         }
+
+        /* REVISI GARIS YANG LEBIH STABIL MENGGUNAKAN BOX BORDER */
+        
+        /* Tim ATAS: Butuh garis L shape (Kanan lalu Bawah) */
+        .connect-down::after {
+            content: ''; position: absolute;
+            right: -20px; 
+            top: 50%;
+            width: 20px; 
+            height: calc(50% + 15px); /* Panjang ke bawah estimasi */
+            border-right: 2px solid var(--line-color);
+            z-index: -1;
+        }
+
+        /* Tim BAWAH: Butuh garis L shape (Kanan lalu Atas) */
+        .connect-up::after {
+            content: ''; position: absolute;
+            right: -20px; 
+            bottom: 50%;
+            width: 20px; 
+            height: calc(50% + 15px); /* Panjang ke atas estimasi */
+            border-right: 2px solid var(--line-color);
+            z-index: -1;
+        }
+
+        /* Garis masuk ke match berikutnya */
+        .round + .round .match::after {
+            content: ''; position: absolute;
+            left: -20px; top: 50%;
+            width: 20px; height: 2px;
+            background: var(--line-color);
+            z-index: -1;
+        }
+        /* Hapus garis masuk untuk Champion Box */
+        .round:last-child .match::after { display: none; }
+
 
         .cyber-btn {
             background: linear-gradient(90deg, rgba(0,243,255,0.1), rgba(0,86,179,0.2)); color: #fff; border: 1px solid rgba(0,243,255,0.3);
             padding: 8px 16px; border-radius: 4px; text-transform: uppercase; font-weight: bold; transition: 0.3s;
         }
         .cyber-btn:hover { background: rgba(0,243,255,0.2); border-color: var(--ice-cyan); }
-        
         .modal-bg { background: rgba(0,0,0,0.85); backdrop-filter: blur(5px); }
         .admin-only { display: none !important; }
-        
+
     </style>
 </head>
 <body class="p-4">
@@ -184,16 +223,16 @@
     <div id="setupModal" class="fixed inset-0 modal-bg hidden z-50 flex items-center justify-center p-4">
         <div class="bg-[#0f172a] border border-[#00f3ff] p-6 rounded-xl w-full max-w-md shadow-[0_0_50px_rgba(0,243,255,0.1)]">
             <h2 class="text-xl font-bold text-white mb-4 border-b border-gray-700 pb-2">SETUP NEW TOURNAMENT</h2>
-            <p class="text-xs text-red-400 mb-4 bg-red-900/20 p-2 rounded border border-red-900/50">⚠️ Warning: Membuat turnamen baru akan menghapus data braket yang sedang berjalan!</p>
+            <p class="text-xs text-red-400 mb-4 bg-red-900/20 p-2 rounded border border-red-900/50">⚠️ Warning: Data turnamen lama akan terhapus!</p>
             
-            <label class="block text-sm text-[#00f3ff] mb-2 font-bold">Participant Count:</label>
+            <label class="block text-sm text-[#00f3ff] mb-2 font-bold">Jumlah Tim:</label>
             <select id="teamCount" class="w-full bg-black text-white border border-gray-600 rounded p-3 mb-4 focus:border-[#00f3ff] outline-none">
-                <option value="4">4 Teams (Semi Final)</option>
-                <option value="8" selected>8 Teams (Quarter Final)</option>
-                <option value="16">16 Teams (Round of 16)</option>
+                <option value="4">4 Tim (Semi Final)</option>
+                <option value="8" selected>8 Tim (Quarter Final)</option>
+                <option value="16">16 Tim (Round of 16)</option>
             </select>
 
-            <label class="block text-sm text-[#00f3ff] mb-2 font-bold">Team Names (1 per baris):</label>
+            <label class="block text-sm text-[#00f3ff] mb-2 font-bold">Nama Tim (1 per baris):</label>
             <textarea id="teamNamesInput" rows="6" class="w-full bg-black text-white border border-gray-600 rounded p-3 text-sm focus:border-[#00f3ff] outline-none" placeholder="Team Alpha&#10;Team Bravo&#10;Team Charlie..."></textarea>
             
             <div class="flex justify-end gap-3 mt-6">
@@ -261,7 +300,6 @@
             const count = parseInt(document.getElementById('teamCount').value);
             const rawNames = document.getElementById('teamNamesInput').value.trim().split('\n');
             let teams = rawNames.filter(n => n.trim() !== "");
-            
             while(teams.length < count) teams.push(`Slot ${teams.length + 1}`);
             teams = teams.slice(0, count);
             teams.sort(() => Math.random() - 0.5); 
@@ -294,7 +332,7 @@
             closeModal('setupModal');
         }
 
-        // --- RENDER LOGIC ---
+        // --- RENDER LOGIC (FIXED LINES) ---
         function renderBracket(data) {
             const container = document.getElementById('bracketContainer');
             container.innerHTML = '';
@@ -313,20 +351,36 @@
                 title.innerText = roundNames[startIndex + rIndex] || `Round ${rIndex+1}`;
                 roundDiv.appendChild(title);
 
+                // Cek apakah ini ronde terakhir (Final)
+                const isFinalRound = rIndex === data.rounds.length - 1;
+
                 round.forEach((match, mIndex) => {
                     const matchDiv = document.createElement('div');
-                    let lineClass = '';
-                    if (rIndex < data.rounds.length - 1) {
-                         lineClass = (mIndex % 2 === 0) ? 'match-pair-bottom' : 'match-pair-top';
-                    }
                     
+                    // Logic Garis:
+                    // Jika INI BUKAN Final, kita perlu garis keluar.
+                    // Jika mIndex Genap (0,2,4) -> Tim ATAS -> Connect Down
+                    // Jika mIndex Ganjil (1,3,5) -> Tim BAWAH -> Connect Up
+                    
+                    let lineClass = '';
+                    let connectorClass = '';
+
+                    if (!isFinalRound) {
+                        connectorClass = 'has-connector'; // Garis horizontal keluar
+                        if (mIndex % 2 === 0) {
+                            lineClass = 'connect-down'; // Tim atas garisnya turun
+                        } else {
+                            lineClass = 'connect-up'; // Tim bawah garisnya naik
+                        }
+                    }
+
                     let cursorClass = "cursor-default";
                     if(isAdmin) {
                         cursorClass = "clickable";
                         matchDiv.onclick = () => openScoreModal(rIndex, mIndex);
                     }
                     
-                    matchDiv.className = `match ${lineClass} ${cursorClass}`;
+                    matchDiv.className = `match ${connectorClass} ${lineClass} ${cursorClass}`;
 
                     const isP1Win = match.winner === match.p1 && match.winner !== "TBA" && match.winner !== null;
                     const isP2Win = match.winner === match.p2 && match.winner !== "TBA" && match.winner !== null;
@@ -352,9 +406,10 @@
             if(finalRound.winner) {
                 const champDiv = document.createElement('div');
                 champDiv.className = 'round justify-center';
+                champDiv.style.width = '220px'; // Ukuran khusus champion
                 champDiv.innerHTML = `
                     <div class="round-title text-yellow-400"><i class="fas fa-crown"></i> CHAMPION</div>
-                    <div class="p-6 border-2 border-yellow-500 rounded-xl bg-gradient-to-b from-yellow-900/50 to-black text-center shadow-[0_0_30px_rgba(234,179,8,0.4)] relative overflow-hidden">
+                    <div class="p-6 border-2 border-yellow-500 rounded-xl bg-gradient-to-b from-yellow-900/50 to-black text-center shadow-[0_0_30px_rgba(234,179,8,0.4)] relative overflow-hidden transform scale-110">
                         <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-20"></div>
                         <span class="text-2xl font-bold text-white uppercase tracking-widest relative z-10">${finalRound.winner}</span>
                     </div>
@@ -369,15 +424,12 @@
             if(match.p1 === "TBA" || match.p2 === "TBA") {
                 alert("Match belum siap!"); return;
             }
-
             selectedRoundIdx = rIdx; selectedMatchIdx = mIdx;
-            
             document.querySelector('.match-id-display').innerText = `${match.p1} vs ${match.p2}`;
             document.getElementById('scoreTeamA').innerText = match.p1;
             document.getElementById('scoreTeamB').innerText = match.p2;
             document.getElementById('inputScoreA').value = match.s1;
             document.getElementById('inputScoreB').value = match.s2;
-
             document.getElementById('scoreModal').classList.remove('hidden');
         }
 
@@ -386,13 +438,11 @@
             const mIdx = selectedMatchIdx;
             const rounds = JSON.parse(JSON.stringify(localData.rounds)); 
             const match = rounds[rIdx][mIdx];
-
             const s1 = parseInt(document.getElementById('inputScoreA').value);
             const s2 = parseInt(document.getElementById('inputScoreB').value);
 
             match.s1 = s1;
             match.s2 = s2;
-
             if (s1 > s2) match.winner = match.p1;
             else if (s2 > s1) match.winner = match.p2;
             else match.winner = null;
@@ -401,7 +451,6 @@
             if (match.winner && nextRIdx < rounds.length) {
                 const nextMIdx = Math.floor(mIdx / 2);
                 const isTopSlot = (mIdx % 2 === 0);
-
                 if(isTopSlot) rounds[nextRIdx][nextMIdx].p1 = match.winner;
                 else rounds[nextRIdx][nextMIdx].p2 = match.winner;
                 
@@ -409,7 +458,6 @@
                 rounds[nextRIdx][nextMIdx].s1 = 0;
                 rounds[nextRIdx][nextMIdx].s2 = 0;
             }
-
             window.saveTournament({ rounds: rounds });
             closeModal('scoreModal');
         }
