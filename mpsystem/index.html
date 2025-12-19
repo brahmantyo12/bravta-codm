@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bravta12 - MP Bracket System</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+
+    <style>
+        :root {
+            --ice-cyan: #00f3ff;
+            --deep-blue: #0056b3;
+            --bg-dark: #02060f;
+            --match-bg: rgba(2, 6, 15, 0.9);
+            --line-color: #334155;
+            --line-active: #00f3ff;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            background-image: radial-gradient(circle at center, #0a192f 0%, var(--bg-dark) 100%);
+            color: var(--ice-cyan);
+            font-family: 'Rajdhani', sans-serif;
+            min-height: 100vh;
+            overflow-x: auto; /* Allow scrolling for large brackets */
+        }
+
+        /* --- BRACKET STYLES --- */
+        .tournament-container {
+            display: flex;
+            flex-direction: row;
+            justify-content: flex-start;
+            padding: 40px;
+        }
+
+        .round {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-around;
+            width: 250px;
+            margin-right: 60px; /* Space for lines */
+            position: relative;
+        }
+
+        .round-title {
+            text-align: center;
+            color: #fff;
+            margin-bottom: 20px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            border-bottom: 1px solid var(--ice-cyan);
+            padding-bottom: 5px;
+        }
+
+        .match {
+            background-color: var(--match-bg);
+            border: 1px solid var(--line-color);
+            border-radius: 8px;
+            padding: 10px;
+            margin: 10px 0;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
+        }
+
+        .match:hover {
+            border-color: var(--ice-cyan);
+            box-shadow: 0 0 15px rgba(0, 243, 255, 0.2);
+        }
+
+        .team {
+            display: flex;
+            justify-content: space-between;
+            padding: 5px;
+            border-radius: 4px;
+        }
+
+        .team:hover { background-color: rgba(255,255,255,0.05); }
+        .team-name { font-weight: 600; color: #cbd5e1; }
+        .team-score { font-family: monospace; color: var(--ice-cyan); }
+        
+        /* Winner Highlight */
+        .winner { color: var(--ice-cyan); text-shadow: 0 0 5px var(--ice-cyan); font-weight: bold; }
+        .winner-row { background: linear-gradient(90deg, rgba(0,243,255,0.1), transparent); border-left: 3px solid var(--ice-cyan); }
+
+        /* --- CONNECTING LINES (CSS MAGIC) --- */
+        .match::after {
+            content: ''; position: absolute;
+            width: 30px; height: 1px;
+            background-color: var(--line-color);
+            right: -31px; top: 50%;
+            z-index: 0;
+        }
+        
+        /* Hilangkan garis untuk ronde terakhir (Champion) */
+        .round:last-child .match::after { display: none; }
+
+        /* Logic for connecting matches (Fork Shape) */
+        .match-pair-top::before {
+            content: ''; position: absolute;
+            width: 30px; height: 50%;
+            border-right: 1px solid var(--line-color);
+            right: -31px; top: 50%;
+        }
+        
+        .match-pair-bottom::before {
+            content: ''; position: absolute;
+            width: 30px; height: 50%;
+            border-right: 1px solid var(--line-color);
+            right: -31px; bottom: 50%;
+        }
+
+        /* --- UI COMPONENTS --- */
+        .cyber-btn {
+            background: linear-gradient(90deg, rgba(0,243,255,0.1), rgba(0,86,179,0.2));
+            color: #fff; border: 1px solid rgba(0,243,255,0.3);
+            padding: 8px 16px; border-radius: 4px;
+            text-transform: uppercase; letter-spacing: 1px;
+            transition: all 0.3s;
+        }
+        .cyber-btn:hover { background: rgba(0, 243, 255, 0.2); border-color: var(--ice-cyan); box-shadow: 0 0 10px rgba(0,243,255,0.3); }
+
+        .modal-bg {
+            background: rgba(0,0,0,0.8); backdrop-filter: blur(5px);
+        }
+    </style>
+</head>
+<body class="p-4">
+
+    <div class="max-w-7xl mx-auto mb-6">
+        <div class="flex flex-col md:flex-row justify-between items-center gap-4 bg-[#02060f] p-4 rounded-xl border border-gray-800 shadow-lg relative z-20">
+            <div>
+                <h1 class="text-3xl font-bold text-white uppercase tracking-widest text-shadow">MP BRACKET <span class="text-[#00f3ff]">SYSTEM</span></h1>
+                <p class="text-xs text-gray-400">MULTIPLAYER 5v5 TOURNAMENT</p>
+            </div>
+            
+            <div class="flex gap-2">
+                <button onclick="openSetupModal()" class="cyber-btn"><i class="fas fa-edit mr-2"></i> SETUP TEAMS</button>
+                <button onclick="downloadBracket()" class="cyber-btn"><i class="fas fa-camera mr-2"></i> EXPORT IMAGE</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="overflow-x-auto pb-10 custom-scrollbar">
+        <div id="bracketContainer" class="tournament-container min-w-[1000px]">
+            <div class="flex h-[60vh] items-center justify-center w-full text-gray-600">
+                <p>Waiting for Setup... Click "SETUP TEAMS" to start.</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="setupModal" class="fixed inset-0 modal-bg hidden z-50 flex items-center justify-center">
+        <div class="bg-[#0f172a] border border-[#00f3ff] p-6 rounded-xl w-full max-w-md shadow-[0_0_30px_rgba(0,243,255,0.2)]">
+            <h2 class="text-xl font-bold text-white mb-4 border-b border-gray-700 pb-2">TOURNAMENT SETUP</h2>
+            
+            <label class="block text-sm text-[#00f3ff] mb-2">Participant Count:</label>
+            <select id="teamCount" class="w-full bg-gray-900 text-white border border-gray-600 rounded p-2 mb-4 focus:border-[#00f3ff] outline-none">
+                <option value="4">4 Teams (Semi Final)</option>
+                <option value="8" selected>8 Teams (Quarter Final)</option>
+                <option value="16">16 Teams (Round of 16)</option>
+            </select>
+
+            <label class="block text-sm text-[#00f3ff] mb-2">Team Names (1 per line):</label>
+            <textarea id="teamNamesInput" rows="8" class="w-full bg-gray-900 text-gray-300 border border-gray-600 rounded p-2 text-sm focus:border-[#00f3ff] outline-none" placeholder="Team Alpha&#10;Team Bravo&#10;Team Charlie..."></textarea>
+            
+            <div class="flex justify-end gap-3 mt-6">
+                <button onclick="closeModal('setupModal')" class="px-4 py-2 text-gray-400 hover:text-white">Cancel</button>
+                <button onclick="generateBracket()" class="cyber-btn">GENERATE BRACKET</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="matchModal" class="fixed inset-0 modal-bg hidden z-50 flex items-center justify-center">
+        <div class="bg-[#0f172a] border border-orange-500 p-6 rounded-xl w-full max-w-sm shadow-[0_0_30px_rgba(249,115,22,0.2)]">
+            <h2 class="text-xl font-bold text-white mb-1">UPDATE MATCH</h2>
+            <p class="text-xs text-gray-500 mb-6 match-id-display">MATCH #1</p>
+
+            <div class="space-y-4">
+                <div onclick="selectWinner('A')" id="btnTeamA" class="p-4 border border-gray-700 rounded-lg cursor-pointer hover:bg-gray-800 transition flex justify-between items-center group">
+                    <span id="modalTeamA" class="font-bold text-lg">Team A</span>
+                    <i class="fas fa-check-circle text-gray-600 group-hover:text-green-500 text-xl"></i>
+                </div>
+
+                <div class="text-center text-xs text-gray-500">- VS -</div>
+
+                <div onclick="selectWinner('B')" id="btnTeamB" class="p-4 border border-gray-700 rounded-lg cursor-pointer hover:bg-gray-800 transition flex justify-between items-center group">
+                    <span id="modalTeamB" class="font-bold text-lg">Team B</span>
+                    <i class="fas fa-check-circle text-gray-600 group-hover:text-green-500 text-xl"></i>
+                </div>
+            </div>
+
+            <div class="flex justify-end mt-6">
+                <button onclick="closeModal('matchModal')" class="text-gray-400 hover:text-white text-sm">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- DATA STRUCTURE ---
+        let tournamentData = []; // Array of Rounds, each containing Matches
+        let currentMatchId = null;
+
+        // --- CORE FUNCTIONS ---
+
+        function openSetupModal() {
+            document.getElementById('setupModal').classList.remove('hidden');
+        }
+        
+        function closeModal(id) {
+            document.getElementById(id).classList.add('hidden');
+        }
+
+        function generateBracket() {
+            const count = parseInt(document.getElementById('teamCount').value);
+            const rawNames = document.getElementById('teamNamesInput').value.trim().split('\n');
+            let teams = rawNames.filter(n => n.trim() !== "");
+
+            // Fill empty slots with "TBA" if not enough names
+            while(teams.length < count) {
+                teams.push(`Slot ${teams.length + 1}`);
+            }
+            // Cut if too many
+            teams = teams.slice(0, count);
+
+            // Shuffle Teams
+            teams.sort(() => Math.random() - 0.5);
+
+            // Init Structure
+            tournamentData = [];
+            let totalRounds = Math.log2(count);
+            let matchIdCounter = 1;
+
+            // Create Round 1
+            let round1 = [];
+            for (let i = 0; i < count; i += 2) {
+                round1.push({
+                    id: matchIdCounter++,
+                    p1: teams[i],
+                    p2: teams[i+1],
+                    winner: null,
+                    nextMatchId: null // To be linked
+                });
+            }
+            tournamentData.push(round1);
+
+            // Create Subsequent Rounds (Empty slots)
+            for (let r = 1; r < totalRounds; r++) {
+                let prevRound = tournamentData[r-1];
+                let currentRound = [];
+                for(let i = 0; i < prevRound.length; i += 2) {
+                    currentRound.push({
+                        id: matchIdCounter++,
+                        p1: null, // Winner of prev match A
+                        p2: null, // Winner of prev match B
+                        winner: null,
+                        sourceA: prevRound[i].id,
+                        sourceB: prevRound[i+1].id
+                    });
+                }
+                tournamentData.push(currentRound);
+            }
+
+            renderBracket();
+            closeModal('setupModal');
+        }
+
+        function renderBracket() {
+            const container = document.getElementById('bracketContainer');
+            container.innerHTML = '';
+
+            const roundNames = ["Round of 16", "Quarter Final", "Semi Final", "Grand Final", "Champion"];
+            
+            // Adjust names based on total rounds
+            let startIndex = roundNames.length - tournamentData.length - 1; // -1 for champion display logic if added later
+            if(tournamentData.length === 2) startIndex = 2; // Semi -> Final
+            if(tournamentData.length === 3) startIndex = 1; // Quarter -> Semi -> Final
+            if(tournamentData.length === 4) startIndex = 0; // R16 -> ...
+
+            tournamentData.forEach((round, rIndex) => {
+                const roundDiv = document.createElement('div');
+                roundDiv.className = 'round';
+                
+                // Title
+                const title = document.createElement('div');
+                title.className = 'round-title';
+                title.innerText = roundNames[startIndex + rIndex] || `Round ${rIndex+1}`;
+                roundDiv.appendChild(title);
+
+                round.forEach((match, mIndex) => {
+                    const matchDiv = document.createElement('div');
+                    // Add CSS classes for lines
+                    let lineClass = '';
+                    if (rIndex < tournamentData.length - 1) {
+                         if (mIndex % 2 === 0) lineClass = 'match-pair-bottom';
+                         else lineClass = 'match-pair-top';
+                    }
+                    
+                    matchDiv.className = `match ${lineClass}`;
+                    matchDiv.onclick = () => openMatchModal(rIndex, mIndex);
+
+                    // Player 1 HTML
+                    let p1Class = (match.winner && match.winner === match.p1) ? 'winner-row' : '';
+                    let p1TextClass = (match.winner && match.winner === match.p1) ? 'winner' : 'team-name';
+                    
+                    // Player 2 HTML
+                    let p2Class = (match.winner && match.winner === match.p2) ? 'winner-row' : '';
+                    let p2TextClass = (match.winner && match.winner === match.p2) ? 'winner' : 'team-name';
+
+                    matchDiv.innerHTML = `
+                        <div class="team ${p1Class}">
+                            <span class="${p1TextClass}">${match.p1 || '...'}</span>
+                        </div>
+                        <div class="border-t border-gray-700 my-1"></div>
+                        <div class="team ${p2Class}">
+                            <span class="${p2TextClass}">${match.p2 || '...'}</span>
+                        </div>
+                    `;
+                    roundDiv.appendChild(matchDiv);
+                });
+
+                container.appendChild(roundDiv);
+            });
+
+            // Add Champion Box (Visual Only)
+            const finalRound = tournamentData[tournamentData.length - 1][0];
+            if(finalRound.winner) {
+                const champDiv = document.createElement('div');
+                champDiv.className = 'round';
+                champDiv.innerHTML = `
+                    <div class="round-title text-yellow-400"><i class="fas fa-crown"></i> CHAMPION</div>
+                    <div class="match border-yellow-500 shadow-[0_0_20px_rgba(234,179,8,0.3)]">
+                        <div class="team justify-center py-4">
+                            <span class="text-xl font-bold text-yellow-400 uppercase tracking-widest">${finalRound.winner}</span>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(champDiv);
+            }
+        }
+
+        // --- INTERACTION LOGIC ---
+        let selectedRoundIdx = -1;
+        let selectedMatchIdx = -1;
+
+        function openMatchModal(rIdx, mIdx) {
+            const match = tournamentData[rIdx][mIdx];
+            
+            // Check if match is ready (both players present)
+            if(!match.p1 || !match.p2) {
+                alert("Match belum siap! Tunggu babak sebelumnya selesai.");
+                return;
+            }
+            
+            // Check if winner already decided (optional: allow re-edit)
+            // if(match.winner) return; 
+
+            selectedRoundIdx = rIdx;
+            selectedMatchIdx = mIdx;
+            
+            document.querySelector('.match-id-display').innerText = `MATCH ID: ${match.id} | ${match.p1} vs ${match.p2}`;
+            document.getElementById('modalTeamA').innerText = match.p1;
+            document.getElementById('modalTeamB').innerText = match.p2;
+
+            document.getElementById('matchModal').classList.remove('hidden');
+        }
+
+        function selectWinner(selection) {
+            const match = tournamentData[selectedRoundIdx][selectedMatchIdx];
+            const winnerName = selection === 'A' ? match.p1 : match.p2;
+            
+            match.winner = winnerName;
+
+            // Move winner to next round
+            const nextRoundIdx = selectedRoundIdx + 1;
+            if (nextRoundIdx < tournamentData.length) {
+                const nextRound = tournamentData[nextRoundIdx];
+                // Find match in next round that expects this source
+                const nextMatch = nextRound.find(m => m.sourceA === match.id || m.sourceB === match.id);
+                
+                if(nextMatch) {
+                    if(nextMatch.sourceA === match.id) nextMatch.p1 = winnerName;
+                    else if(nextMatch.sourceB === match.id) nextMatch.p2 = winnerName;
+                    
+                    // Reset winner of next match if we changed the previous outcome
+                    nextMatch.winner = null; 
+                    // Recursively clean up subsequent rounds logic could go here, but keep simple for now
+                }
+            }
+
+            renderBracket();
+            closeModal('matchModal');
+        }
+
+        function downloadBracket() {
+            const element = document.getElementById("bracketContainer");
+            
+            // Temporary styling fix for capture
+            const originalTransform = element.style.transform;
+            element.style.width = "fit-content";
+            
+            html2canvas(element, { backgroundColor: "#02060f", scale: 2 }).then(canvas => {
+                const link = document.createElement('a');
+                link.download = 'Bravta_MP_Bracket.png';
+                link.href = canvas.toDataURL();
+                link.click();
+                
+                element.style.width = ""; // Reset
+            });
+        }
+    </script>
+</body>
+</html>
