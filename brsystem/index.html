@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bravta12 - Tournament System</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+
+    <style>
+        :root {
+            --ice-cyan: #00f3ff;
+            --ice-glow: #bcfeff;
+            --deep-blue: #0056b3;
+            --bg-dark: #02060f;
+            --glass-bg: rgba(0, 243, 255, 0.05);
+            --glass-border: rgba(0, 243, 255, 0.3);
+            --card-bg: rgba(2, 6, 15, 0.7);
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            background-image: radial-gradient(circle at top, #0a192f 0%, var(--bg-dark) 80%);
+            color: var(--ice-cyan);
+            font-family: 'Rajdhani', sans-serif;
+            min-height: 100vh;
+        }
+
+        /* --- PRELOADER STYLES --- */
+        #preloader {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: var(--bg-dark); z-index: 9999;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            transition: opacity 0.8s ease-out, visibility 0.8s ease-out;
+        }
+        .loader-ring {
+            width: 80px; height: 80px; border: 2px solid transparent; border-top: 2px solid var(--ice-cyan);
+            border-radius: 50%; animation: spin 1.5s linear infinite; position: relative;
+            box-shadow: 0 0 15px rgba(0, 243, 255, 0.2);
+        }
+        .loader-ring::before {
+            content: ""; position: absolute; top: 5px; left: 5px; right: 5px; bottom: 5px;
+            border: 2px solid transparent; border-top: 2px solid var(--deep-blue);
+            border-radius: 50%; animation: spin-reverse 1s linear infinite;
+        }
+        .loader-ring::after {
+            content: ""; position: absolute; top: 25px; left: 25px; right: 25px; bottom: 25px;
+            background: var(--ice-cyan); border-radius: 50%; box-shadow: 0 0 20px var(--ice-cyan);
+            animation: pulse 1s ease-in-out infinite;
+        }
+        .loading-text {
+            margin-top: 20px; font-weight: 700; font-size: 1.2rem; letter-spacing: 3px;
+            color: var(--ice-cyan); text-transform: uppercase; animation: blink 1.5s infinite;
+        }
+        .loaded { opacity: 0; visibility: hidden; }
+
+        /* --- ANIMATIONS --- */
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        @keyframes spin-reverse { 0% { transform: rotate(0deg); } 100% { transform: rotate(-360deg); } }
+        @keyframes pulse { 0% { transform: scale(0.8); opacity: 0.5; } 50% { transform: scale(1); opacity: 1; } 100% { transform: scale(0.8); opacity: 0.5; } }
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+        /* --- CUSTOM UI COMPONENTS --- */
+        .glass-panel {
+            background-color: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 0 20px rgba(0, 243, 255, 0.05);
+        }
+
+        .cyber-title {
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-shadow: 0 0 10px var(--ice-cyan), 0 0 20px var(--deep-blue);
+        }
+
+        .cyber-input {
+            background-color: rgba(0, 0, 0, 0.5);
+            border: 1px solid #334155;
+            color: var(--ice-glow);
+            transition: all 0.3s;
+        }
+        .cyber-input:focus {
+            border-color: var(--ice-cyan);
+            box-shadow: 0 0 10px rgba(0, 243, 255, 0.3);
+            outline: none;
+        }
+
+        /* Button Style adapted from Bravta Portfolio */
+        .cyber-btn {
+            background: linear-gradient(90deg, rgba(0,243,255,0.1), rgba(0,86,179,0.2));
+            color: #fff;
+            border: 1px solid var(--glass-border);
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+        }
+        .cyber-btn::before {
+            content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: 0.5s;
+        }
+        .cyber-btn:hover::before { left: 100%; }
+        .cyber-btn:hover {
+            background-color: rgba(0, 243, 255, 0.2);
+            border-color: var(--ice-cyan);
+            box-shadow: 0 0 15px rgba(0, 243, 255, 0.4);
+            transform: translateY(-2px);
+            color: #fff;
+        }
+        .cyber-btn:disabled {
+            opacity: 0.5; cursor: not-allowed; filter: grayscale(100%);
+        }
+
+        .card-team {
+            background-color: var(--card-bg);
+            border: 1px solid #1e293b;
+            transition: all 0.3s;
+        }
+        .card-team:hover {
+            border-color: var(--ice-cyan);
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px -5px rgba(0, 243, 255, 0.15);
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #02060f; }
+        ::-webkit-scrollbar-thumb { background: #0056b3; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #00f3ff; }
+
+        select {
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%2300f3ff' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+            background-position: right 0.5rem center; background-repeat: no-repeat; background-size: 1.5em 1.5em;
+            padding-right: 2.5rem; -webkit-appearance: none; appearance: none;
+        }
+
+        /* --- MOBILE OPTIMIZATION --- */
+        /* Mencegah auto-zoom di iOS/Android saat klik input (agar font tidak terlalu kecil) */
+        @media screen and (max-width: 768px) {
+            input, select, textarea {
+                font-size: 16px !important; 
+            }
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+
+    <div id="preloader">
+        <div class="loader-ring"></div>
+        <div class="loading-text">SYSTEM INITIALIZING...</div>
+    </div>
+
+    <div class="max-w-7xl mx-auto">
+        <header class="mb-10 text-center relative">
+            <h1 class="text-4xl md:text-6xl font-extrabold cyber-title mb-2">
+                BRAVTA TOURNAMENT SYSTEM <span class="text-sm align-top text-gray-500">v2.0</span>
+            </h1>
+            <p style="color: var(--ice-glow); letter-spacing: 2px;" class="text-lg uppercase opacity-80">Battle-Royale Tournament Admin Dashboard</p>
+            <div class="h-1 w-24 bg-gradient-to-r from-transparent via-[#00f3ff] to-transparent mx-auto mt-4"></div>
+        </header>
+
+        <div class="glass-panel p-6 rounded-xl mb-8 relative overflow-hidden">
+            <div class="absolute top-0 right-0 w-32 h-32 bg-blue-600 rounded-full blur-[80px] opacity-20 pointer-events-none"></div>
+
+            <div class="flex flex-col md:flex-row justify-between items-center mb-6 border-b border-gray-700/50 pb-4 gap-4 relative z-10">
+                <h2 class="text-2xl font-bold text-white flex items-center gap-2">
+                    <i class="fas fa-cogs text-[#00f3ff]"></i> CONFIGURATION
+                </h2>
+                
+                <div class="w-full md:w-auto">
+                    <label class="text-xs text-[#00f3ff] uppercase font-bold tracking-wider mb-1 block">Select Mode:</label>
+                    <select id="tournamentMode" onchange="updateInputVisibility()" class="cyber-input w-full text-white text-sm rounded-lg p-3 font-bold cursor-pointer">
+                        <optgroup label="Basis Tim (Punya Tim Sendiri)">
+                            <option value="squad_team" selected>🏆 SQUAD (Data Tim - Max 25 Tim)</option>
+                            <option value="duo_team">👥 DUO (Data Tim - Max 50 Tim)</option>
+                        </optgroup>
+                        <optgroup label="Basis Solo (Acak Tim oleh Admin)">
+                            <option value="squad_shuffle">🎲 SQUAD SHUFFLE (Solo -> Auto 5 Org)</option>
+                            <option value="duo_shuffle">🎲 DUO SHUFFLE (Solo -> Auto 2 Org)</option>
+                        </optgroup>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 relative z-10">
+                <div id="containerFileTeams" class="bg-black/30 p-4 rounded-lg border border-gray-700 transition-all hover:border-[#00f3ff]/50">
+                    <label class="block text-[#00f3ff] font-bold mb-2 flex items-center gap-2">
+                        <i class="fas fa-users"></i> 1. File Data Tim (Main)
+                    </label>
+                    <input type="file" id="fileTeams" accept=".csv" class="cyber-input block w-full text-sm text-gray-400 rounded p-2">
+                    <p class="text-xs text-gray-500 mt-2 italic">*Format: Nama Tim, Nick P1, UID P1...</p>
+                </div>
+                
+                <div id="containerFileSolo" class="bg-black/30 p-4 rounded-lg border border-gray-700 transition-all hover:border-[#00f3ff]/50">
+                    <label id="labelFileSolo" class="block text-green-400 font-bold mb-2 flex items-center gap-2">
+                        <i class="fas fa-user"></i> 2. File Data Solo (Opt)
+                    </label>
+                    <input type="file" id="fileSolo" accept=".csv" class="cyber-input block w-full text-sm text-gray-400 rounded p-2">
+                    <p id="descFileSolo" class="text-xs text-gray-500 mt-2 italic">*Format: Nickname, UID, No WA</p>
+                </div>
+            </div>
+            
+            <div class="mt-8 relative z-10">
+                <button onclick="processFiles()" id="btnProcess" class="cyber-btn w-full py-4 rounded-lg text-lg shadow-[0_0_15px_rgba(0,243,255,0.1)]">
+                    <i class="fas fa-rocket mr-2"></i> INITIATE DATA PROCESSING
+                </button>
+            </div>
+            
+            <div id="actionButtons" class="hidden mt-6 pt-6 border-t border-gray-700/50 grid grid-cols-1 md:grid-cols-2 gap-4 relative z-10">
+                <button id="btnSolo" onclick="convertSoloToTeams()" class="cyber-btn py-3 rounded-lg opacity-50 cursor-not-allowed" disabled>
+                    <i class="fas fa-random mr-2"></i> MERGE SOLO PLAYERS
+                </button>
+                <button onclick="randomizeBR()" class="cyber-btn py-3 rounded-lg border-orange-500/50 text-orange-200 hover:text-white hover:border-orange-500">
+                    <i class="fas fa-dice mr-2"></i> GENERATE LOBBY
+                </button>
+            </div>
+        </div>
+
+        <div id="teamListSection" class="hidden mb-12">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-end border-b border-[#00f3ff]/30 pb-4 mb-6 gap-4">
+                <div>
+                    <h2 class="text-2xl font-bold text-white cyber-title"><i class="fas fa-list-alt text-[#00f3ff]"></i> REGISTERED UNITS</h2>
+                    <div class="flex items-center gap-3 mt-1">
+                        <span id="totalTeamsLabel" class="text-sm text-[#00f3ff] font-bold"></span>
+                        <span id="modeLabelDisplay" class="text-xs bg-[#0056b3]/50 px-2 py-1 rounded text-white border border-[#00f3ff]/30"></span>
+                    </div>
+                </div>
+                
+                <div class="flex flex-wrap gap-3">
+                    <button onclick="exportToCSV()" class="cyber-btn px-4 py-2 rounded text-sm font-bold flex items-center gap-2">
+                        <i class="fas fa-file-csv"></i> EXPORT CSV
+                    </button>
+                    <button onclick="downloadTeamListImage()" id="btnDownloadTeamImg" class="cyber-btn px-4 py-2 rounded text-sm font-bold flex items-center gap-2 border-purple-500/50 hover:border-purple-500">
+                        <i class="fas fa-camera"></i> CAPTURE IMG
+                    </button>
+                </div>
+            </div>
+            
+            <div id="teamListCaptureArea" class="bg-[#02060f] p-4 -m-4 rounded-lg">
+                <div id="teamListContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                    </div>
+            </div>
+        </div>
+
+        <div id="brSection" class="hidden mb-12 pb-20">
+            <div class="flex flex-wrap justify-between items-center mb-6 border-b border-orange-500/30 pb-4 gap-4">
+                <h2 class="text-2xl font-bold text-orange-400 cyber-title"><i class="fas fa-fire"></i> BATTLE ROYALE LOBBY</h2>
+                
+                <button onclick="downloadBRImage()" id="btnDownloadBRImg" class="cyber-btn px-4 py-2 rounded text-sm font-bold flex items-center gap-2 border-orange-500/50 hover:border-orange-500">
+                    <i class="fas fa-camera"></i> CAPTURE LOBBY
+                </button>
+            </div>
+
+            <div id="brContainer" class="bg-[#02060f] p-4 -m-4 rounded-lg"> 
+                <div id="brGrid" class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // --- PRELOADER SCRIPT ---
+        window.addEventListener('load', function() {
+            const preloader = document.getElementById('preloader');
+            setTimeout(() => {
+                preloader.classList.add('loaded');
+                setTimeout(() => {
+                    preloader.style.display = 'none';
+                }, 800);
+            }, 1200); 
+        });
+
+        // --- TOURNAMENT LOGIC ---
+        let rawTeams = [];
+        let rawSolo = [];
+        let isSoloMerged = false;
+
+        const MODES = {
+            squad_team: { type: 'team', label: 'SQUAD (Team Base)', teamSize: 5, lobbyMax: 25 },
+            duo_team:   { type: 'team', label: 'DUO (Team Base)', teamSize: 2, lobbyMax: 50 },
+            squad_shuffle: { type: 'shuffle', label: 'SQUAD (Solo Shuffle)', teamSize: 5, lobbyMax: 25 },
+            duo_shuffle:   { type: 'shuffle', label: 'DUO (Solo Shuffle)', teamSize: 2, lobbyMax: 50 }
+        };
+
+        function getCurrentMode() {
+            const val = document.getElementById('tournamentMode').value;
+            return MODES[val];
+        }
+
+        function updateInputVisibility() {
+            const mode = getCurrentMode();
+            const containerTeam = document.getElementById('containerFileTeams');
+            const labelSolo = document.getElementById('labelFileSolo');
+            const descSolo = document.getElementById('descFileSolo');
+
+            document.getElementById('fileTeams').value = "";
+            document.getElementById('fileSolo').value = "";
+
+            if (mode.type === 'shuffle') {
+                containerTeam.classList.add('hidden');
+                labelSolo.innerHTML = '<i class="fas fa-users"></i> 1. File Data Player (Wajib)';
+                labelSolo.classList.replace('text-green-400', 'text-[#00f3ff]');
+                descSolo.innerText = "*Upload CSV berisi daftar semua player individu untuk diacak.";
+            } else {
+                containerTeam.classList.remove('hidden');
+                labelSolo.innerHTML = '<i class="fas fa-user"></i> 2. File Data Solo (Opsional)';
+                labelSolo.classList.replace('text-[#00f3ff]', 'text-green-400');
+                descSolo.innerText = "*Upload player yang belum punya tim.";
+            }
+        }
+
+        function processFiles() {
+            const mode = getCurrentMode();
+            const btn = document.getElementById('btnProcess');
+            
+            rawTeams = []; rawSolo = []; isSoloMerged = false;
+            
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> READING DATA...'; btn.disabled = true;
+
+            if (mode.type === 'team') {
+                const fileTeams = document.getElementById('fileTeams').files[0];
+                const fileSolo = document.getElementById('fileSolo').files[0];
+
+                if (!fileTeams) { alert("❌ Mode Team Wajib upload File Teams!"); btn.disabled=false; btn.innerHTML='<i class="fas fa-rocket mr-2"></i> INITIATE DATA PROCESSING'; return; }
+
+                Papa.parse(fileTeams, {
+                    header: true, skipEmptyLines: true,
+                    complete: function(results) {
+                        rawTeams = results.data.filter(r => r['Nama Tim'] && r['Nama Tim'].trim() !== "");
+                        if (fileSolo) {
+                            Papa.parse(fileSolo, {
+                                header: true, skipEmptyLines: true,
+                                complete: function(soloResults) {
+                                    rawSolo = soloResults.data.filter(r => r['Nickname']);
+                                    finishLoading(mode);
+                                }
+                            });
+                        } else { finishLoading(mode); }
+                    }
+                });
+
+            } else {
+                const fileSolo = document.getElementById('fileSolo').files[0];
+                if (!fileSolo) { alert("❌ Mode Shuffle Wajib upload File Player!"); btn.disabled=false; btn.innerHTML='<i class="fas fa-rocket mr-2"></i> INITIATE DATA PROCESSING'; return; }
+
+                Papa.parse(fileSolo, {
+                    header: true, skipEmptyLines: true,
+                    complete: function(results) {
+                        const allPlayers = results.data.filter(r => r['Nickname']);
+                        generateTeamsFromSolo(allPlayers, mode);
+                    }
+                });
+            }
+        }
+
+        function generateTeamsFromSolo(players, mode) {
+            let shuffled = [...players].sort(() => 0.5 - Math.random());
+            let generatedTeams = [];
+            let counter = 1;
+
+            for (let i = 0; i < shuffled.length; i += mode.teamSize) {
+                const chunk = shuffled.slice(i, i + mode.teamSize);
+                let teamName = `RANDOM ${mode.label.split(' ')[0]} #${counter}`;
+                let virtualTeam = { 'Nama Tim': teamName, 'No WA': chunk[0]['No WA'] || '-', 'Logo URL': 'SHUFFLE', 'IsShuffle': true };
+
+                chunk.forEach((player, idx) => {
+                    let pNum = idx + 1;
+                    virtualTeam[`Nick P${pNum}`] = player['Nickname'];
+                    virtualTeam[`UID P${pNum}`] = player['UID'];
+                });
+                generatedTeams.push(virtualTeam);
+                counter++;
+            }
+            rawTeams = generatedTeams; rawSolo = []; isSoloMerged = true;
+            finishLoading(mode);
+        }
+
+        function finishLoading(mode) {
+            renderTeamList(rawTeams);
+            document.getElementById('teamListSection').classList.remove('hidden');
+            document.getElementById('actionButtons').classList.remove('hidden');
+            const btnSolo = document.getElementById('btnSolo');
+            
+            document.getElementById('modeLabelDisplay').innerText = `${mode.label}`;
+
+            if (mode.type === 'shuffle') {
+                btnSolo.disabled = true;
+                btnSolo.innerHTML = '<i class="fas fa-check"></i> AUTO SHUFFLED';
+                btnSolo.classList.add('opacity-50', 'cursor-not-allowed');
+                document.getElementById('teamListSection').scrollIntoView({ behavior: 'smooth' });
+            } else {
+                if(rawSolo.length > 0) {
+                    btnSolo.disabled = false;
+                    btnSolo.classList.remove('opacity-50', 'cursor-not-allowed');
+                    btnSolo.innerHTML = `<i class="fas fa-random"></i> GABUNG ${rawSolo.length} SOLO PLAYER`;
+                } else {
+                    btnSolo.innerHTML = '<i class="fas fa-ban"></i> DATA SOLO KOSONG';
+                    btnSolo.disabled = true;
+                    btnSolo.classList.add('opacity-50', 'cursor-not-allowed');
+                }
+            }
+            document.getElementById('btnProcess').innerHTML = '<i class="fas fa-sync"></i> RESET / RE-PROCESS';
+            document.getElementById('btnProcess').disabled = false;
+        }
+
+        function convertSoloToTeams() {
+            if(isSoloMerged || rawSolo.length === 0) return;
+            const mode = getCurrentMode();
+            let shuffledSolo = [...rawSolo].sort(() => 0.5 - Math.random());
+            let newMercenaryTeams = [];
+            let counter = 1;
+
+            for (let i = 0; i < shuffledSolo.length; i += mode.teamSize) {
+                const chunk = shuffledSolo.slice(i, i + mode.teamSize);
+                let virtualTeam = { 'Nama Tim': `MERCENARY ${mode.label.split(' ')[0]} ${counter}`, 'No WA': chunk[0]['No WA'] || '-', 'Logo URL': 'MERCENARY', 'IsMercenary': true };
+                chunk.forEach((player, idx) => {
+                    let pNum = idx + 1;
+                    virtualTeam[`Nick P${pNum}`] = player['Nickname'];
+                    virtualTeam[`UID P${pNum}`] = player['UID'];
+                });
+                newMercenaryTeams.push(virtualTeam);
+                counter++;
+            }
+            rawTeams = [...rawTeams, ...newMercenaryTeams];
+            isSoloMerged = true;
+            renderTeamList(rawTeams);
+            
+            const btnSolo = document.getElementById('btnSolo');
+            btnSolo.disabled = true;
+            btnSolo.innerHTML = '<i class="fas fa-check"></i> SUKSES DIGABUNGKAN';
+            btnSolo.classList.add('opacity-50', 'cursor-not-allowed');
+        }
+
+        function renderTeamList(teams) {
+            const container = document.getElementById('teamListContainer');
+            document.getElementById('totalTeamsLabel').innerText = `TOTAL: ${teams.length} TIM`;
+            container.innerHTML = "";
+
+            teams.forEach(team => {
+                let playersHtml = "";
+                for(let i=1; i<=5; i++) {
+                    if(team[`Nick P${i}`]) {
+                        playersHtml += `<tr class="border-b border-gray-700/50 hover:bg-[#00f3ff]/10 transition"><td class="py-1 px-2 text-gray-300 truncate max-w-[80px]">${team[`Nick P${i}`]}</td><td class="font-mono text-[#00f3ff] text-xs px-2 text-right">${team[`UID P${i}`] || '-'}</td></tr>`;
+                    }
+                }
+                
+                let badgeHtml = "";
+                if(team.IsMercenary) badgeHtml = `<span class="bg-green-600/80 text-white text-[0.6rem] px-2 py-0.5 rounded uppercase ml-2">SOLO SQUAD</span>`;
+                if(team.IsShuffle) badgeHtml = `<span class="bg-purple-600/80 text-white text-[0.6rem] px-2 py-0.5 rounded uppercase ml-2">AUTO</span>`;
+
+                let logoContent = '<i class="fas fa-shield-alt text-2xl"></i>';
+                if(team['Logo URL'] && team['Logo URL'].length > 10) logoContent = `<img src="${team['Logo URL']}" class="w-full h-full object-cover">`;
+                if(team.IsMercenary) logoContent = '<i class="fas fa-users-slash text-2xl"></i>';
+                if(team.IsShuffle) logoContent = '<i class="fas fa-dice text-2xl"></i>';
+
+                let borderClass = 'border-gray-700';
+                if(team.IsMercenary) borderClass = 'border-green-500/50 shadow-[0_0_10px_rgba(34,197,94,0.2)]';
+                if(team.IsShuffle) borderClass = 'border-purple-500/50 shadow-[0_0_10px_rgba(168,85,247,0.2)]';
+
+                container.innerHTML += `
+                    <div class="card-team p-4 rounded-xl relative overflow-hidden ${borderClass}">
+                        <div class="flex items-center gap-3 mb-4 border-b border-gray-700/50 pb-2">
+                            <div class="w-12 h-12 bg-gray-900 rounded-full flex items-center justify-center overflow-hidden border border-gray-500 shadow-[0_0_10px_rgba(0,0,0,0.5)] shrink-0 text-gray-400">${logoContent}</div>
+                            <div class="overflow-hidden">
+                                <div class="flex items-center"><h3 class="font-bold text-lg text-white truncate font-[Rajdhani] tracking-wide">${team['Nama Tim']}</h3>${badgeHtml}</div>
+                                <p class="text-xs text-gray-500 flex items-center gap-1"><i class="fab fa-whatsapp"></i> ${team['No WA'] || '-'}</p>
+                            </div>
+                        </div>
+                        <div class="bg-black/40 rounded-lg p-2"><table class="w-full text-xs text-left"><thead class="text-gray-500 font-semibold border-b border-gray-700"><tr><th class="px-2 pb-1">NICK</th><th class="px-2 pb-1 text-right">UID</th></tr></thead><tbody>${playersHtml}</tbody></table></div>
+                    </div>`;
+            });
+        }
+
+        function randomizeBR() {
+            if(rawTeams.length === 0) { alert("❌ Belum ada data tim!"); return; }
+            const mode = getCurrentMode();
+            if(mode.type === 'team' && rawSolo.length > 0 && !isSoloMerged) {
+                if(!confirm("⚠️ Data Solo belum digabung. Lanjut?")) return;
+            }
+
+            let shuffled = [...rawTeams].sort(() => 0.5 - Math.random());
+            const perLobby = mode.lobbyMax;
+            const lobbyCount = Math.ceil(shuffled.length / perLobby);
+            
+            const container = document.getElementById('brGrid'); 
+            container.innerHTML = "";
+            document.getElementById('brSection').classList.remove('hidden');
+            
+            for(let i=0; i < lobbyCount; i++) {
+                const lobbyTeams = shuffled.slice(i * perLobby, (i + 1) * perLobby);
+                let rows = "";
+                lobbyTeams.forEach((t, idx) => {
+                    let nameClass = "text-gray-200 font-medium";
+                    if(t.IsMercenary) nameClass = "text-green-400 italic";
+                    if(t.IsShuffle) nameClass = "text-purple-400 font-bold";
+
+                    rows += `<tr class="border-b border-gray-700/50 hover:bg-orange-900/10"><td class="py-2 px-3 font-bold text-orange-500 text-center w-10 border-r border-gray-800">${idx + 1}</td><td class="py-2 px-3 ${nameClass} tracking-wide">${t['Nama Tim']}</td><td class="py-2 px-3 text-xs text-gray-500 font-mono text-right">${t['No WA']}</td></tr>`;
+                });
+
+                container.innerHTML += `
+                    <div class="glass-panel rounded-xl overflow-hidden border border-orange-900/50 shadow-2xl">
+                        <div class="bg-gradient-to-r from-orange-900/80 to-[#02060f] p-3 flex justify-between items-center border-b border-orange-700/50">
+                            <h3 class="text-xl font-bold text-white tracking-widest"><i class="fas fa-gamepad"></i> LOBBY ${String.fromCharCode(65 + i)}</h3>
+                            <span class="text-xs bg-black/40 px-2 py-1 rounded text-orange-200 border border-orange-500/30">${lobbyTeams.length} / ${perLobby} UNITS</span>
+                        </div>
+                        <div class="p-2 bg-[#02060f]/80"><table class="w-full text-sm"><thead class="text-gray-500 uppercase text-xs border-b border-gray-700"><tr><th class="py-2 px-3">#</th><th class="text-left px-3">UNIT NAME</th><th class="text-right px-3">CONTACT</th></tr></thead><tbody>${rows}</tbody></table></div>
+                    </div>`;
+            }
+            document.getElementById('brSection').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // --- EXPORT FUNCTIONS (UNCHANGED LOGIC) ---
+        function downloadTeamListImage() {
+            const btn = document.getElementById('btnDownloadTeamImg');
+            const originalText = btn.innerHTML;
+            const element = document.getElementById("teamListCaptureArea"); 
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> PROCESING...'; btn.disabled = true;
+            html2canvas(element, { backgroundColor: "#02060f", scale: 2, useCORS: true }).then(canvas => {
+                let link = document.createElement('a'); link.download = `BRAVTA_LIST_${new Date().getTime()}.png`;
+                link.href = canvas.toDataURL("image/png"); link.click();
+                btn.innerHTML = originalText; btn.disabled = false; alert("✅ IMAGE SAVED!");
+            }).catch(err => { console.error(err); btn.innerHTML = originalText; btn.disabled = false; });
+        }
+
+        function downloadBRImage() {
+            const btn = document.getElementById('btnDownloadBRImg');
+            const originalText = btn.innerHTML;
+            const element = document.getElementById("brContainer"); 
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> PROCESING...'; btn.disabled = true;
+            html2canvas(element, { backgroundColor: "#02060f", scale: 2, useCORS: true }).then(canvas => {
+                let link = document.createElement('a'); link.download = `BRAVTA_LOBBY_${new Date().getTime()}.png`;
+                link.href = canvas.toDataURL("image/png"); link.click();
+                btn.innerHTML = originalText; btn.disabled = false; alert("✅ IMAGE SAVED!");
+            }).catch(err => { console.error(err); btn.innerHTML = originalText; btn.disabled = false; });
+        }
+
+        function exportToCSV() {
+            if(rawTeams.length === 0) { alert("Data Empty!"); return; }
+            let csvContent = "data:text/csv;charset=utf-8,";
+            csvContent += "Nama Tim,No WA,Type,Nick P1,UID P1,Nick P2,UID P2,Nick P3,UID P3,Nick P4,UID P4,Nick P5,UID P5\n";
+            rawTeams.forEach(t => {
+                let type = "REGULER"; if(t.IsMercenary) type = "SOLO_MERGE"; if(t.IsShuffle) type = "AUTO_SHUFFLE";
+                let row = [`"${t['Nama Tim']}"`,`"${t['No WA']}"`, type];
+                for(let i=1; i<=5; i++) { row.push(`"${t[`Nick P${i}`] || ''}"`); row.push(`"${t[`UID P${i}`] || ''}"`); }
+                csvContent += row.join(",") + "\n";
+            });
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a"); link.setAttribute("href", encodedUri); link.setAttribute("download", `BACKUP_BRAVTA_${new Date().getTime()}.csv`);
+            document.body.appendChild(link); link.click(); document.body.removeChild(link);
+        }
+    </script>
+</body>
+</html>
