@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CoDM Tournament Dashboard (Full Export)</title>
+    <title>CoDM Tournament Dashboard (Multi-Mode)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -19,6 +19,16 @@
         }
         input[type="file"]::file-selector-button:hover { background-color: #2563eb; }
         
+        select {
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%239ca3af' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+            background-position: right 0.5rem center;
+            background-repeat: no-repeat;
+            background-size: 1.5em 1.5em;
+            padding-right: 2.5rem;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+
         .mercenary-badge {
             background: linear-gradient(45deg, #10b981, #059669);
             color: white; font-size: 0.6rem; padding: 2px 6px; border-radius: 4px; text-transform: uppercase; letter-spacing: 1px;
@@ -36,11 +46,21 @@
         </header>
 
         <div class="bg-gray-800 p-6 rounded-xl mb-8 shadow-2xl border border-gray-700">
-            <h2 class="text-xl font-bold mb-4 text-white">📂 Upload & Proses Data</h2>
+            <div class="flex flex-col md:flex-row justify-between items-center mb-6 border-b border-gray-700 pb-4 gap-4">
+                <h2 class="text-xl font-bold text-white">📂 Konfigurasi & Upload</h2>
+                
+                <div class="w-full md:w-auto">
+                    <label class="text-xs text-gray-400 uppercase font-bold tracking-wider mb-1 block">Pilih Mode Turnamen:</label>
+                    <select id="tournamentMode" class="bg-gray-900 border border-yellow-500 text-white text-sm rounded-lg focus:ring-yellow-500 focus:border-yellow-500 block w-full p-2.5 font-bold">
+                        <option value="squad" selected>🏆 SQUAD (5 Pemain - Max 25 Tim)</option>
+                        <option value="duo">👥 DUO (2 Pemain - Max 50 Tim)</option>
+                    </select>
+                </div>
+            </div>
             
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div class="bg-gray-900 p-4 rounded-lg border border-gray-600">
-                    <label class="block text-yellow-400 font-bold mb-2">1. File Data Tim (Squad)</label>
+                    <label class="block text-yellow-400 font-bold mb-2">1. File Data Tim</label>
                     <input type="file" id="fileTeams" accept=".csv" class="block w-full text-sm text-gray-400">
                 </div>
                 <div class="bg-gray-900 p-4 rounded-lg border border-gray-600">
@@ -70,6 +90,7 @@
                 <div>
                     <h2 class="text-2xl font-bold text-white">📋 Daftar Peserta Terdaftar</h2>
                     <span id="totalTeamsLabel" class="text-sm text-yellow-400 font-bold"></span>
+                    <span id="modeLabelDisplay" class="ml-2 text-xs bg-gray-700 px-2 py-1 rounded text-white"></span>
                 </div>
                 
                 <div class="flex flex-wrap gap-2">
@@ -110,6 +131,27 @@
         let rawSolo = [];
         let isSoloMerged = false;
 
+        // --- KONFIGURASI MODE ---
+        const MODES = {
+            squad: {
+                label: 'SQUAD',
+                teamSize: 5,
+                lobbyMax: 25,
+                badgeColor: 'text-green-400'
+            },
+            duo: {
+                label: 'DUO',
+                teamSize: 2,
+                lobbyMax: 50,
+                badgeColor: 'text-blue-400'
+            }
+        };
+
+        function getCurrentMode() {
+            const select = document.getElementById('tournamentMode');
+            return MODES[select.value];
+        }
+
         // --- CORE FUNCTIONS ---
         function processFiles() {
             const fileTeams = document.getElementById('fileTeams').files[0];
@@ -144,12 +186,16 @@
             document.getElementById('teamListSection').classList.remove('hidden');
             document.getElementById('actionButtons').classList.remove('hidden');
             const btnSolo = document.getElementById('btnSolo');
+            const mode = getCurrentMode();
+
+            // Update Label Mode
+            document.getElementById('modeLabelDisplay').innerText = `Mode: ${mode.label}`;
 
             if(rawSolo.length > 0) {
                 btnSolo.disabled = false;
                 btnSolo.classList.remove('bg-gray-700', 'text-gray-400', 'cursor-not-allowed', 'opacity-50');
                 btnSolo.classList.add('bg-green-600', 'text-white', 'hover:bg-green-500');
-                btnSolo.innerHTML = `⚔️ Gabung ${rawSolo.length} Player Solo`;
+                btnSolo.innerHTML = `⚔️ Gabung ${rawSolo.length} Player Solo (Format ${mode.label})`;
             } else {
                 btnSolo.innerHTML = "⚔️ Tidak ada Data Solo";
             }
@@ -159,15 +205,19 @@
 
         function convertSoloToTeams() {
             if(isSoloMerged || rawSolo.length === 0) return;
+            
+            const mode = getCurrentMode();
             let shuffledSolo = [...rawSolo].sort(() => 0.5 - Math.random());
-            const teamSize = 5; 
+            
+            // Gunakan ukuran tim berdasarkan mode (5 untuk Squad, 2 untuk Duo)
+            const teamSize = mode.teamSize; 
             let newMercenaryTeams = [];
             let counter = 1;
 
             for (let i = 0; i < shuffledSolo.length; i += teamSize) {
                 const chunk = shuffledSolo.slice(i, i + teamSize);
                 let virtualTeam = {
-                    'Nama Tim': `Mercenary Team ${counter}`,
+                    'Nama Tim': `Mercenary ${mode.label} ${counter}`,
                     'No WA': chunk[0]['No WA'] || '-',
                     'Logo URL': 'MERCENARY_LOGO',
                     'IsMercenary': true
@@ -189,22 +239,25 @@
             btnSolo.disabled = true;
             btnSolo.innerHTML = "✅ SUKSES DIGABUNGKAN";
             btnSolo.classList.add('opacity-50', 'cursor-not-allowed');
-            alert(`Berhasil membuat ${newMercenaryTeams.length} Tim Mercenary!`);
+            alert(`Berhasil membuat ${newMercenaryTeams.length} Tim ${mode.label} dari Player Solo!`);
         }
 
         function renderTeamList(teams) {
             const container = document.getElementById('teamListContainer');
             document.getElementById('totalTeamsLabel').innerText = `Total: ${teams.length} Tim`;
             container.innerHTML = "";
+            const mode = getCurrentMode();
 
             teams.forEach(team => {
                 let playersHtml = "";
+                // Loop tetap 5 kali untuk keamanan display, tapi di mode Duo data P3-P5 kosong
                 for(let i=1; i<=5; i++) {
                     if(team[`Nick P${i}`]) {
                         playersHtml += `<tr class="border-b border-gray-700/50"><td class="py-1 text-gray-300 truncate max-w-[80px]">${team[`Nick P${i}`]}</td><td class="font-mono text-blue-400 text-xs">${team[`UID P${i}`] || '-'}</td></tr>`;
                     }
                 }
-                let badgeHtml = team.IsMercenary ? `<span class="mercenary-badge ml-2">SOLO SQUAD</span>` : "";
+                
+                let badgeHtml = team.IsMercenary ? `<span class="mercenary-badge ml-2">SOLO ${mode.label}</span>` : "";
                 let logoContent = (team['Logo URL'] && team['Logo URL'].length > 5 && !team.IsMercenary) ? `<img src="${team['Logo URL']}" class="w-full h-full object-cover">` : '<span class="text-2xl">🛡️</span>';
                 if(team.IsMercenary) logoContent = '<span class="text-2xl">⚔️</span>';
 
@@ -225,8 +278,11 @@
                 if(!confirm("⚠️ Data Solo belum digabung. Mereka tidak akan masuk pembagian grup. Lanjut?")) return;
             }
 
+            const mode = getCurrentMode();
             let shuffled = [...rawTeams].sort(() => 0.5 - Math.random());
-            const perLobby = 25; 
+            
+            // Gunakan batas lobby berdasarkan mode (25 untuk Squad, 50 untuk Duo)
+            const perLobby = mode.lobbyMax; 
             const lobbyCount = Math.ceil(shuffled.length / perLobby);
             
             const container = document.getElementById('brGrid'); 
@@ -244,7 +300,7 @@
                 container.innerHTML += `
                     <div class="bg-gray-800 rounded-xl overflow-hidden border border-gray-600 shadow-2xl">
                         <div class="bg-gradient-to-r from-red-900 to-gray-800 p-3 flex justify-between items-center border-b border-red-700">
-                            <h3 class="text-xl font-bold text-white tracking-wider">LOBBY ${String.fromCharCode(65 + i)}</h3>
+                            <h3 class="text-xl font-bold text-white tracking-wider">LOBBY ${String.fromCharCode(65 + i)} (${mode.label})</h3>
                             <span class="text-xs bg-black/40 px-2 py-1 rounded text-red-200 border border-red-500/30">${lobbyTeams.length} / ${perLobby} Tim</span>
                         </div>
                         <div class="p-2 bg-gray-900"><table class="w-full text-sm"><thead class="text-gray-400 uppercase text-xs"><tr><th class="py-2 px-3">#</th><th class="text-left px-3">Nama Tim</th><th class="text-right px-3">Kontak</th></tr></thead><tbody>${rows}</tbody></table></div>
@@ -253,9 +309,8 @@
             document.getElementById('brSection').scrollIntoView({ behavior: 'smooth' });
         }
 
-        // --- EXPORT FUNCTIONS ---
+        // --- EXPORT FUNCTIONS (Sama seperti sebelumnya) ---
 
-        // 1. Export Gambar: DAFTAR PESERTA (NEW)
         function downloadTeamListImage() {
             const btn = document.getElementById('btnDownloadTeamImg');
             const originalText = btn.innerHTML;
@@ -276,7 +331,6 @@
             });
         }
 
-        // 2. Export Gambar: HASIL BR
         function downloadBRImage() {
             const btn = document.getElementById('btnDownloadBRImg');
             const originalText = btn.innerHTML;
@@ -297,7 +351,6 @@
             });
         }
 
-        // 3. Export CSV (Backup Data)
         function exportToCSV() {
             if(rawTeams.length === 0) { alert("Data masih kosong!"); return; }
             let csvContent = "data:text/csv;charset=utf-8,";
