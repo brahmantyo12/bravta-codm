@@ -3,10 +3,47 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bravta12 - MP Bracket System</title>
+    <title>Bravta12 - Live Bracket</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    
+    <script type="module">
+        // Kita menggunakan link CDN agar jalan di GitHub Pages tanpa install NPM
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getDatabase, ref, set, onValue, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+        // --- INI CONFIG ASLI MILIKMU (SUDAH SAYA MASUKKAN) ---
+        const firebaseConfig = {
+            apiKey: "AIzaSyCb71qnIjcHA9hBe20AHhQIX4xGlzgYk_Q",
+            authDomain: "bravta-tournament.firebaseapp.com",
+            databaseURL: "https://bravta-tournament-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "bravta-tournament",
+            storageBucket: "bravta-tournament.firebasestorage.app",
+            messagingSenderId: "215927889474",
+            appId: "1:215927889474:web:d8e898e1f6ec08c95597db"
+        };
+        // ------------------------------------------------------
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        // Fungsi Global untuk Save & Update
+        window.saveTournament = (data) => set(ref(db, 'currentTournament'), data);
+        
+        // Listen to Live Updates (Mendengarkan data real-time)
+        onValue(ref(db, 'currentTournament'), (snapshot) => {
+            const data = snapshot.val();
+            if (data) {
+                window.loadFromFirebase(data);
+            } else {
+                console.log("Belum ada data turnamen aktif.");
+                // Jika kosong dan kita admin, kita bisa setup nanti
+            }
+        });
+    </script>
+
     <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
 
@@ -17,7 +54,6 @@
             --bg-dark: #02060f;
             --match-bg: rgba(2, 6, 15, 0.9);
             --line-color: #334155;
-            --line-active: #00f3ff;
         }
 
         body {
@@ -26,108 +62,56 @@
             color: var(--ice-cyan);
             font-family: 'Rajdhani', sans-serif;
             min-height: 100vh;
-            overflow-x: auto; /* Allow scrolling for large brackets */
         }
 
-        /* --- BRACKET STYLES --- */
-        .tournament-container {
-            display: flex;
-            flex-direction: row;
-            justify-content: flex-start;
-            padding: 40px;
-        }
+        /* --- Scrollbar --- */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #02060f; }
+        ::-webkit-scrollbar-thumb { background: #0056b3; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #00f3ff; }
 
-        .round {
-            display: flex;
-            flex-direction: column;
-            justify-content: space-around;
-            width: 250px;
-            margin-right: 60px; /* Space for lines */
-            position: relative;
-        }
-
-        .round-title {
-            text-align: center;
-            color: #fff;
-            margin-bottom: 20px;
-            font-weight: bold;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            border-bottom: 1px solid var(--ice-cyan);
-            padding-bottom: 5px;
-        }
-
+        .tournament-container { display: flex; padding: 40px; }
+        .round { display: flex; flex-direction: column; justify-content: space-around; width: 260px; margin-right: 50px; }
+        .round-title { text-align: center; color: #fff; margin-bottom: 20px; font-weight: bold; border-bottom: 1px solid var(--ice-cyan); letter-spacing: 2px; }
+        
         .match {
             background-color: var(--match-bg);
             border: 1px solid var(--line-color);
-            border-radius: 8px;
-            padding: 10px;
-            margin: 10px 0;
-            position: relative;
-            cursor: pointer;
-            transition: all 0.2s;
+            border-radius: 8px; padding: 8px; margin: 10px 0;
+            position: relative; cursor: default; transition: all 0.2s;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
         }
+        .match.clickable:hover { border-color: var(--ice-cyan); cursor: pointer; box-shadow: 0 0 15px rgba(0, 243, 255, 0.2); }
 
-        .match:hover {
-            border-color: var(--ice-cyan);
-            box-shadow: 0 0 15px rgba(0, 243, 255, 0.2);
-        }
+        .team { display: flex; justify-content: space-between; align-items: center; padding: 6px; border-radius: 4px; }
+        .team-name { font-weight: 600; color: #cbd5e1; max-width: 160px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .team-score { font-family: monospace; font-size: 1.1rem; color: #fbbf24; font-weight: bold; background: rgba(0,0,0,0.5); padding: 0 8px; border-radius: 4px; min-width: 30px; text-align: center; }
 
-        .team {
-            display: flex;
-            justify-content: space-between;
-            padding: 5px;
-            border-radius: 4px;
-        }
+        /* Winner Styles */
+        .winner .team-name { color: var(--ice-cyan); text-shadow: 0 0 10px var(--ice-cyan); }
+        .winner-row { background: linear-gradient(90deg, rgba(0,243,255,0.15), transparent); border-left: 3px solid var(--ice-cyan); }
 
-        .team:hover { background-color: rgba(255,255,255,0.05); }
-        .team-name { font-weight: 600; color: #cbd5e1; }
-        .team-score { font-family: monospace; color: var(--ice-cyan); }
-        
-        /* Winner Highlight */
-        .winner { color: var(--ice-cyan); text-shadow: 0 0 5px var(--ice-cyan); font-weight: bold; }
-        .winner-row { background: linear-gradient(90deg, rgba(0,243,255,0.1), transparent); border-left: 3px solid var(--ice-cyan); }
-
-        /* --- CONNECTING LINES (CSS MAGIC) --- */
-        .match::after {
-            content: ''; position: absolute;
-            width: 30px; height: 1px;
-            background-color: var(--line-color);
-            right: -31px; top: 50%;
-            z-index: 0;
-        }
-        
-        /* Hilangkan garis untuk ronde terakhir (Champion) */
+        /* Lines */
+        .match::after { content: ''; position: absolute; width: 25px; height: 1px; background: var(--line-color); right: -26px; top: 50%; z-index: 0; }
         .round:last-child .match::after { display: none; }
+        .match-pair-top::before { content: ''; position: absolute; width: 25px; height: 50%; border-right: 1px solid var(--line-color); right: -26px; top: 50%; z-index: 0; }
+        .match-pair-bottom::before { content: ''; position: absolute; width: 25px; height: 50%; border-right: 1px solid var(--line-color); right: -26px; bottom: 50%; z-index: 0; }
 
-        /* Logic for connecting matches (Fork Shape) */
-        .match-pair-top::before {
-            content: ''; position: absolute;
-            width: 30px; height: 50%;
-            border-right: 1px solid var(--line-color);
-            right: -31px; top: 50%;
-        }
-        
-        .match-pair-bottom::before {
-            content: ''; position: absolute;
-            width: 30px; height: 50%;
-            border-right: 1px solid var(--line-color);
-            right: -31px; bottom: 50%;
-        }
-
-        /* --- UI COMPONENTS --- */
         .cyber-btn {
-            background: linear-gradient(90deg, rgba(0,243,255,0.1), rgba(0,86,179,0.2));
-            color: #fff; border: 1px solid rgba(0,243,255,0.3);
-            padding: 8px 16px; border-radius: 4px;
-            text-transform: uppercase; letter-spacing: 1px;
-            transition: all 0.3s;
+            background: linear-gradient(90deg, rgba(0,243,255,0.1), rgba(0,86,179,0.2)); color: #fff; border: 1px solid rgba(0,243,255,0.3);
+            padding: 8px 16px; border-radius: 4px; text-transform: uppercase; font-weight: bold; transition: 0.3s;
         }
-        .cyber-btn:hover { background: rgba(0, 243, 255, 0.2); border-color: var(--ice-cyan); box-shadow: 0 0 10px rgba(0,243,255,0.3); }
-
-        .modal-bg {
-            background: rgba(0,0,0,0.8); backdrop-filter: blur(5px);
+        .cyber-btn:hover { background: rgba(0,243,255,0.2); border-color: var(--ice-cyan); }
+        
+        .modal-bg { background: rgba(0,0,0,0.85); backdrop-filter: blur(5px); }
+        
+        /* Admin Only Elements */
+        .admin-only { display: none !important; }
+        
+        /* Mobile Optimization */
+        @media (max-width: 768px) {
+            .tournament-container { padding: 20px; }
+            .round { width: 220px; margin-right: 30px; }
         }
     </style>
 </head>
@@ -136,157 +120,180 @@
     <div class="max-w-7xl mx-auto mb-6">
         <div class="flex flex-col md:flex-row justify-between items-center gap-4 bg-[#02060f] p-4 rounded-xl border border-gray-800 shadow-lg relative z-20">
             <div>
-                <h1 class="text-3xl font-bold text-white uppercase tracking-widest text-shadow">MP BRACKET <span class="text-[#00f3ff]">SYSTEM</span></h1>
-                <p class="text-xs text-gray-400">MULTIPLAYER 5v5 TOURNAMENT</p>
+                <h1 class="text-3xl font-bold text-white uppercase tracking-widest text-shadow-glow">LIVE <span class="text-[#00f3ff]">BRACKET</span></h1>
+                <div class="flex items-center gap-2 mt-1">
+                    <div class="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
+                    <p class="text-xs text-gray-400 tracking-wider">REAL-TIME CONNECTED</p>
+                </div>
             </div>
             
             <div class="flex gap-2">
-                <button onclick="openSetupModal()" class="cyber-btn"><i class="fas fa-edit mr-2"></i> SETUP TEAMS</button>
-                <button onclick="downloadBracket()" class="cyber-btn"><i class="fas fa-camera mr-2"></i> EXPORT IMAGE</button>
+                <div id="adminControls" class="admin-only flex gap-2">
+                    <button onclick="openSetupModal()" class="cyber-btn border-yellow-500/50 text-yellow-400 hover:text-white"><i class="fas fa-tools mr-2"></i> SETUP</button>
+                </div>
+                <button onclick="enableAdminMode()" id="btnAdminLogin" class="cyber-btn border-gray-600 text-gray-300 hover:text-white"><i class="fas fa-lock mr-2"></i> ADMIN</button>
             </div>
         </div>
     </div>
 
     <div class="overflow-x-auto pb-10 custom-scrollbar">
-        <div id="bracketContainer" class="tournament-container min-w-[1000px]">
-            <div class="flex h-[60vh] items-center justify-center w-full text-gray-600">
-                <p>Waiting for Setup... Click "SETUP TEAMS" to start.</p>
+        <div id="bracketContainer" class="tournament-container min-w-[1000px] flex items-center justify-center h-[50vh]">
+            <div class="text-center">
+                <i class="fas fa-satellite-dish text-4xl text-gray-700 mb-4 animate-bounce"></i>
+                <p class="text-gray-500 font-mono">Waiting for Tournament Data...</p>
+                <p class="text-xs text-gray-700 mt-2">If you are Admin, click "ADMIN" to Setup.</p>
             </div>
         </div>
     </div>
 
-    <div id="setupModal" class="fixed inset-0 modal-bg hidden z-50 flex items-center justify-center">
-        <div class="bg-[#0f172a] border border-[#00f3ff] p-6 rounded-xl w-full max-w-md shadow-[0_0_30px_rgba(0,243,255,0.2)]">
-            <h2 class="text-xl font-bold text-white mb-4 border-b border-gray-700 pb-2">TOURNAMENT SETUP</h2>
+    <div id="setupModal" class="fixed inset-0 modal-bg hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-[#0f172a] border border-[#00f3ff] p-6 rounded-xl w-full max-w-md shadow-[0_0_50px_rgba(0,243,255,0.1)]">
+            <h2 class="text-xl font-bold text-white mb-4 border-b border-gray-700 pb-2">SETUP NEW TOURNAMENT</h2>
+            <p class="text-xs text-red-400 mb-4 bg-red-900/20 p-2 rounded border border-red-900/50">⚠️ Warning: Membuat turnamen baru akan menghapus data braket yang sedang berjalan!</p>
             
-            <label class="block text-sm text-[#00f3ff] mb-2">Participant Count:</label>
-            <select id="teamCount" class="w-full bg-gray-900 text-white border border-gray-600 rounded p-2 mb-4 focus:border-[#00f3ff] outline-none">
+            <label class="block text-sm text-[#00f3ff] mb-2 font-bold">Participant Count:</label>
+            <select id="teamCount" class="w-full bg-black text-white border border-gray-600 rounded p-3 mb-4 focus:border-[#00f3ff] outline-none">
                 <option value="4">4 Teams (Semi Final)</option>
                 <option value="8" selected>8 Teams (Quarter Final)</option>
                 <option value="16">16 Teams (Round of 16)</option>
             </select>
 
-            <label class="block text-sm text-[#00f3ff] mb-2">Team Names (1 per line):</label>
-            <textarea id="teamNamesInput" rows="8" class="w-full bg-gray-900 text-gray-300 border border-gray-600 rounded p-2 text-sm focus:border-[#00f3ff] outline-none" placeholder="Team Alpha&#10;Team Bravo&#10;Team Charlie..."></textarea>
+            <label class="block text-sm text-[#00f3ff] mb-2 font-bold">Team Names (1 per baris):</label>
+            <textarea id="teamNamesInput" rows="6" class="w-full bg-black text-white border border-gray-600 rounded p-3 text-sm focus:border-[#00f3ff] outline-none" placeholder="Team Alpha&#10;Team Bravo&#10;Team Charlie..."></textarea>
             
             <div class="flex justify-end gap-3 mt-6">
-                <button onclick="closeModal('setupModal')" class="px-4 py-2 text-gray-400 hover:text-white">Cancel</button>
-                <button onclick="generateBracket()" class="cyber-btn">GENERATE BRACKET</button>
+                <button onclick="closeModal('setupModal')" class="px-4 text-gray-400 hover:text-white transition">Cancel</button>
+                <button onclick="generateAndSave()" class="cyber-btn bg-red-600/20 border-red-500 hover:bg-red-600 hover:border-red-400">CREATE NEW</button>
             </div>
         </div>
     </div>
 
-    <div id="matchModal" class="fixed inset-0 modal-bg hidden z-50 flex items-center justify-center">
-        <div class="bg-[#0f172a] border border-orange-500 p-6 rounded-xl w-full max-w-sm shadow-[0_0_30px_rgba(249,115,22,0.2)]">
+    <div id="scoreModal" class="fixed inset-0 modal-bg hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-[#0f172a] border border-orange-500 p-6 rounded-xl w-full max-w-sm shadow-[0_0_50px_rgba(249,115,22,0.15)]">
             <h2 class="text-xl font-bold text-white mb-1">UPDATE MATCH</h2>
-            <p class="text-xs text-gray-500 mb-6 match-id-display">MATCH #1</p>
+            <p class="text-xs text-gray-500 mb-6 match-id-display tracking-widest uppercase">MATCH DETAILS</p>
 
-            <div class="space-y-4">
-                <div onclick="selectWinner('A')" id="btnTeamA" class="p-4 border border-gray-700 rounded-lg cursor-pointer hover:bg-gray-800 transition flex justify-between items-center group">
-                    <span id="modalTeamA" class="font-bold text-lg">Team A</span>
-                    <i class="fas fa-check-circle text-gray-600 group-hover:text-green-500 text-xl"></i>
-                </div>
-
-                <div class="text-center text-xs text-gray-500">- VS -</div>
-
-                <div onclick="selectWinner('B')" id="btnTeamB" class="p-4 border border-gray-700 rounded-lg cursor-pointer hover:bg-gray-800 transition flex justify-between items-center group">
-                    <span id="modalTeamB" class="font-bold text-lg">Team B</span>
-                    <i class="fas fa-check-circle text-gray-600 group-hover:text-green-500 text-xl"></i>
-                </div>
+            <div class="flex justify-between items-center mb-4 bg-black/40 p-3 rounded border border-gray-800">
+                <span id="scoreTeamA" class="font-bold text-white text-lg truncate w-32">Team A</span>
+                <input type="number" id="inputScoreA" class="w-16 bg-[#02060f] border border-gray-600 text-center text-yellow-400 font-bold text-xl rounded p-1 focus:border-yellow-400 outline-none" value="0">
             </div>
 
-            <div class="flex justify-end mt-6">
-                <button onclick="closeModal('matchModal')" class="text-gray-400 hover:text-white text-sm">Cancel</button>
+            <div class="flex justify-center text-gray-600 text-xs font-bold mb-4">- VS -</div>
+
+            <div class="flex justify-between items-center mb-8 bg-black/40 p-3 rounded border border-gray-800">
+                <span id="scoreTeamB" class="font-bold text-white text-lg truncate w-32">Team B</span>
+                <input type="number" id="inputScoreB" class="w-16 bg-[#02060f] border border-gray-600 text-center text-yellow-400 font-bold text-xl rounded p-1 focus:border-yellow-400 outline-none" value="0">
+            </div>
+
+            <div class="flex flex-col gap-3">
+                <button onclick="submitScore()" class="cyber-btn w-full bg-green-900/20 text-green-400 border-green-500 hover:bg-green-600 hover:text-white">
+                    <i class="fas fa-check mr-2"></i> UPDATE SCORE
+                </button>
+                <button onclick="closeModal('scoreModal')" class="text-gray-500 text-sm hover:text-white transition">Cancel</button>
             </div>
         </div>
     </div>
 
     <script>
-        // --- DATA STRUCTURE ---
-        let tournamentData = []; // Array of Rounds, each containing Matches
-        let currentMatchId = null;
+        // --- GLOBAL VARIABLES ---
+        let localData = null;
+        let isAdmin = false;
+        let selectedRoundIdx = -1;
+        let selectedMatchIdx = -1;
 
-        // --- CORE FUNCTIONS ---
-
-        function openSetupModal() {
-            document.getElementById('setupModal').classList.remove('hidden');
+        // --- ADMIN AUTH (SIMPLE) ---
+        function enableAdminMode() {
+            // Password sederhana untuk proteksi client-side
+            const pass = prompt("Enter Admin Password:");
+            if(pass === "admin123") { 
+                isAdmin = true;
+                document.getElementById('adminControls').classList.remove('admin-only');
+                document.getElementById('btnAdminLogin').classList.add('hidden');
+                
+                // Refresh tampilan agar match jadi clickable buat admin
+                if(localData) renderBracket(localData);
+                
+                alert("Admin Mode Active: You can now edit matches.");
+            } else {
+                alert("Wrong Password");
+            }
         }
-        
-        function closeModal(id) {
-            document.getElementById(id).classList.add('hidden');
-        }
 
-        function generateBracket() {
+        // --- FIREBASE SYNC FUNCTIONS ---
+        window.loadFromFirebase = (data) => {
+            localData = data;
+            renderBracket(data);
+        };
+
+        // --- GENERATOR LOGIC ---
+        function generateAndSave() {
             const count = parseInt(document.getElementById('teamCount').value);
             const rawNames = document.getElementById('teamNamesInput').value.trim().split('\n');
             let teams = rawNames.filter(n => n.trim() !== "");
-
-            // Fill empty slots with "TBA" if not enough names
-            while(teams.length < count) {
-                teams.push(`Slot ${teams.length + 1}`);
-            }
-            // Cut if too many
+            
+            // Auto fill TBA
+            while(teams.length < count) teams.push(`Slot ${teams.length + 1}`);
             teams = teams.slice(0, count);
+            
+            // Acak Tim (Optional: Hapus baris ini jika ingin urut sesuai input)
+            teams.sort(() => Math.random() - 0.5); 
 
-            // Shuffle Teams
-            teams.sort(() => Math.random() - 0.5);
-
-            // Init Structure
-            tournamentData = [];
+            let structure = [];
+            let matchIdCounter = 0;
             let totalRounds = Math.log2(count);
-            let matchIdCounter = 1;
 
             // Create Round 1
             let round1 = [];
             for (let i = 0; i < count; i += 2) {
                 round1.push({
-                    id: matchIdCounter++,
-                    p1: teams[i],
-                    p2: teams[i+1],
-                    winner: null,
-                    nextMatchId: null // To be linked
+                    id: matchIdCounter++, 
+                    p1: teams[i], 
+                    p2: teams[i+1], 
+                    s1: 0, 
+                    s2: 0, 
+                    winner: null
                 });
             }
-            tournamentData.push(round1);
+            structure.push(round1);
 
-            // Create Subsequent Rounds (Empty slots)
+            // Create Subsequent Rounds
             for (let r = 1; r < totalRounds; r++) {
-                let prevRound = tournamentData[r-1];
+                let prevRound = structure[r-1];
                 let currentRound = [];
                 for(let i = 0; i < prevRound.length; i += 2) {
                     currentRound.push({
-                        id: matchIdCounter++,
-                        p1: null, // Winner of prev match A
-                        p2: null, // Winner of prev match B
+                        id: matchIdCounter++, 
+                        p1: "TBA", 
+                        p2: "TBA", 
+                        s1: 0, 
+                        s2: 0, 
                         winner: null,
-                        sourceA: prevRound[i].id,
-                        sourceB: prevRound[i+1].id
+                        sourceA: { r: r-1, m: i }, 
+                        sourceB: { r: r-1, m: i+1 }
                     });
                 }
-                tournamentData.push(currentRound);
+                structure.push(currentRound);
             }
 
-            renderBracket();
+            // Save to Firebase (Ini akan otomatis menimpa data lama)
+            window.saveTournament({ rounds: structure });
             closeModal('setupModal');
         }
 
-        function renderBracket() {
+        // --- RENDER LOGIC ---
+        function renderBracket(data) {
             const container = document.getElementById('bracketContainer');
             container.innerHTML = '';
+            
+            if(!data || !data.rounds) return;
 
             const roundNames = ["Round of 16", "Quarter Final", "Semi Final", "Grand Final", "Champion"];
-            
-            // Adjust names based on total rounds
-            let startIndex = roundNames.length - tournamentData.length - 1; // -1 for champion display logic if added later
-            if(tournamentData.length === 2) startIndex = 2; // Semi -> Final
-            if(tournamentData.length === 3) startIndex = 1; // Quarter -> Semi -> Final
-            if(tournamentData.length === 4) startIndex = 0; // R16 -> ...
+            let startIndex = roundNames.length - data.rounds.length - 1;
 
-            tournamentData.forEach((round, rIndex) => {
+            data.rounds.forEach((round, rIndex) => {
                 const roundDiv = document.createElement('div');
                 roundDiv.className = 'round';
                 
-                // Title
                 const title = document.createElement('div');
                 title.className = 'round-title';
                 title.innerText = roundNames[startIndex + rIndex] || `Round ${rIndex+1}`;
@@ -294,125 +301,118 @@
 
                 round.forEach((match, mIndex) => {
                     const matchDiv = document.createElement('div');
-                    // Add CSS classes for lines
                     let lineClass = '';
-                    if (rIndex < tournamentData.length - 1) {
-                         if (mIndex % 2 === 0) lineClass = 'match-pair-bottom';
-                         else lineClass = 'match-pair-top';
+                    // Garis penghubung
+                    if (rIndex < data.rounds.length - 1) {
+                         lineClass = (mIndex % 2 === 0) ? 'match-pair-bottom' : 'match-pair-top';
                     }
                     
-                    matchDiv.className = `match ${lineClass}`;
-                    matchDiv.onclick = () => openMatchModal(rIndex, mIndex);
-
-                    // Player 1 HTML
-                    let p1Class = (match.winner && match.winner === match.p1) ? 'winner-row' : '';
-                    let p1TextClass = (match.winner && match.winner === match.p1) ? 'winner' : 'team-name';
+                    // Admin Interaction
+                    let cursorClass = "cursor-default";
+                    if(isAdmin) {
+                        cursorClass = "clickable";
+                        matchDiv.onclick = () => openScoreModal(rIndex, mIndex);
+                    }
                     
-                    // Player 2 HTML
-                    let p2Class = (match.winner && match.winner === match.p2) ? 'winner-row' : '';
-                    let p2TextClass = (match.winner && match.winner === match.p2) ? 'winner' : 'team-name';
+                    matchDiv.className = `match ${lineClass} ${cursorClass}`;
+
+                    // Highlight Winner
+                    const isP1Win = match.winner === match.p1 && match.winner !== "TBA" && match.winner !== null;
+                    const isP2Win = match.winner === match.p2 && match.winner !== "TBA" && match.winner !== null;
 
                     matchDiv.innerHTML = `
-                        <div class="team ${p1Class}">
-                            <span class="${p1TextClass}">${match.p1 || '...'}</span>
+                        <div class="team ${isP1Win ? 'winner-row winner' : ''}">
+                            <span class="team-name">${match.p1}</span>
+                            <span class="team-score">${match.s1}</span>
                         </div>
-                        <div class="border-t border-gray-700 my-1"></div>
-                        <div class="team ${p2Class}">
-                            <span class="${p2TextClass}">${match.p2 || '...'}</span>
+                        <div class="border-t border-gray-800 my-1"></div>
+                        <div class="team ${isP2Win ? 'winner-row winner' : ''}">
+                            <span class="team-name">${match.p2}</span>
+                            <span class="team-score">${match.s2}</span>
                         </div>
                     `;
                     roundDiv.appendChild(matchDiv);
                 });
-
                 container.appendChild(roundDiv);
             });
 
-            // Add Champion Box (Visual Only)
-            const finalRound = tournamentData[tournamentData.length - 1][0];
+            // Champion Display (Hanya muncul jika match terakhir selesai)
+            const finalRound = data.rounds[data.rounds.length - 1][0];
             if(finalRound.winner) {
                 const champDiv = document.createElement('div');
-                champDiv.className = 'round';
+                champDiv.className = 'round justify-center';
                 champDiv.innerHTML = `
                     <div class="round-title text-yellow-400"><i class="fas fa-crown"></i> CHAMPION</div>
-                    <div class="match border-yellow-500 shadow-[0_0_20px_rgba(234,179,8,0.3)]">
-                        <div class="team justify-center py-4">
-                            <span class="text-xl font-bold text-yellow-400 uppercase tracking-widest">${finalRound.winner}</span>
-                        </div>
+                    <div class="p-6 border-2 border-yellow-500 rounded-xl bg-gradient-to-b from-yellow-900/50 to-black text-center shadow-[0_0_30px_rgba(234,179,8,0.4)] relative overflow-hidden">
+                        <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-20"></div>
+                        <span class="text-2xl font-bold text-white uppercase tracking-widest relative z-10">${finalRound.winner}</span>
                     </div>
                 `;
                 container.appendChild(champDiv);
             }
         }
 
-        // --- INTERACTION LOGIC ---
-        let selectedRoundIdx = -1;
-        let selectedMatchIdx = -1;
-
-        function openMatchModal(rIdx, mIdx) {
-            const match = tournamentData[rIdx][mIdx];
-            
-            // Check if match is ready (both players present)
-            if(!match.p1 || !match.p2) {
-                alert("Match belum siap! Tunggu babak sebelumnya selesai.");
-                return;
-            }
-            
-            // Check if winner already decided (optional: allow re-edit)
-            // if(match.winner) return; 
-
-            selectedRoundIdx = rIdx;
-            selectedMatchIdx = mIdx;
-            
-            document.querySelector('.match-id-display').innerText = `MATCH ID: ${match.id} | ${match.p1} vs ${match.p2}`;
-            document.getElementById('modalTeamA').innerText = match.p1;
-            document.getElementById('modalTeamB').innerText = match.p2;
-
-            document.getElementById('matchModal').classList.remove('hidden');
-        }
-
-        function selectWinner(selection) {
-            const match = tournamentData[selectedRoundIdx][selectedMatchIdx];
-            const winnerName = selection === 'A' ? match.p1 : match.p2;
-            
-            match.winner = winnerName;
-
-            // Move winner to next round
-            const nextRoundIdx = selectedRoundIdx + 1;
-            if (nextRoundIdx < tournamentData.length) {
-                const nextRound = tournamentData[nextRoundIdx];
-                // Find match in next round that expects this source
-                const nextMatch = nextRound.find(m => m.sourceA === match.id || m.sourceB === match.id);
-                
-                if(nextMatch) {
-                    if(nextMatch.sourceA === match.id) nextMatch.p1 = winnerName;
-                    else if(nextMatch.sourceB === match.id) nextMatch.p2 = winnerName;
-                    
-                    // Reset winner of next match if we changed the previous outcome
-                    nextMatch.winner = null; 
-                    // Recursively clean up subsequent rounds logic could go here, but keep simple for now
-                }
+        // --- SCORING LOGIC ---
+        function openScoreModal(rIdx, mIdx) {
+            const match = localData.rounds[rIdx][mIdx];
+            if(match.p1 === "TBA" || match.p2 === "TBA") {
+                alert("Match belum siap! Tunggu babak sebelumnya selesai."); return;
             }
 
-            renderBracket();
-            closeModal('matchModal');
+            selectedRoundIdx = rIdx; selectedMatchIdx = mIdx;
+            
+            document.querySelector('.match-id-display').innerText = `${match.p1} vs ${match.p2}`;
+            document.getElementById('scoreTeamA').innerText = match.p1;
+            document.getElementById('scoreTeamB').innerText = match.p2;
+            document.getElementById('inputScoreA').value = match.s1;
+            document.getElementById('inputScoreB').value = match.s2;
+
+            document.getElementById('scoreModal').classList.remove('hidden');
         }
 
-        function downloadBracket() {
-            const element = document.getElementById("bracketContainer");
+        function submitScore() {
+            const rIdx = selectedRoundIdx;
+            const mIdx = selectedMatchIdx;
             
-            // Temporary styling fix for capture
-            const originalTransform = element.style.transform;
-            element.style.width = "fit-content";
-            
-            html2canvas(element, { backgroundColor: "#02060f", scale: 2 }).then(canvas => {
-                const link = document.createElement('a');
-                link.download = 'Bravta_MP_Bracket.png';
-                link.href = canvas.toDataURL();
-                link.click();
+            // Deep copy structure to avoid mutating read-only refs if any
+            const rounds = JSON.parse(JSON.stringify(localData.rounds)); 
+            const match = rounds[rIdx][mIdx];
+
+            const s1 = parseInt(document.getElementById('inputScoreA').value);
+            const s2 = parseInt(document.getElementById('inputScoreB').value);
+
+            match.s1 = s1;
+            match.s2 = s2;
+
+            // Logic Pemenang
+            if (s1 > s2) match.winner = match.p1;
+            else if (s2 > s1) match.winner = match.p2;
+            else match.winner = null; // Seri = belum ada pemenang
+
+            // Logic Memajukan Pemenang ke Babak Selanjutnya
+            const nextRIdx = rIdx + 1;
+            if (match.winner && nextRIdx < rounds.length) {
+                const nextMIdx = Math.floor(mIdx / 2);
+                const isTopSlot = (mIdx % 2 === 0);
+
+                // Update nama tim di slot babak selanjutnya
+                if(isTopSlot) rounds[nextRIdx][nextMIdx].p1 = match.winner;
+                else rounds[nextRIdx][nextMIdx].p2 = match.winner;
                 
-                element.style.width = ""; // Reset
-            });
+                // Reset match selanjutnya jika terjadi perubahan sejarah (misal edit skor babak sebelumnya)
+                rounds[nextRIdx][nextMIdx].winner = null;
+                rounds[nextRIdx][nextMIdx].s1 = 0;
+                rounds[nextRIdx][nextMIdx].s2 = 0;
+            }
+
+            // SAVE TO FIREBASE
+            window.saveTournament({ rounds: rounds });
+            closeModal('scoreModal');
         }
+
+        // --- UTILS ---
+        function openSetupModal() { document.getElementById('setupModal').classList.remove('hidden'); }
+        function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
     </script>
 </body>
 </html>
