@@ -9,11 +9,10 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     
     <script type="module">
-        // Kita menggunakan link CDN agar jalan di GitHub Pages tanpa install NPM
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getDatabase, ref, set, onValue, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-        // --- INI CONFIG ASLI MILIKMU (SUDAH SAYA MASUKKAN) ---
+        // CONFIG FIREBASE MILIKMU
         const firebaseConfig = {
             apiKey: "AIzaSyCb71qnIjcHA9hBe20AHhQIX4xGlzgYk_Q",
             authDomain: "bravta-tournament.firebaseapp.com",
@@ -23,23 +22,18 @@
             messagingSenderId: "215927889474",
             appId: "1:215927889474:web:d8e898e1f6ec08c95597db"
         };
-        // ------------------------------------------------------
 
-        // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        // Fungsi Global untuk Save & Update
         window.saveTournament = (data) => set(ref(db, 'currentTournament'), data);
         
-        // Listen to Live Updates (Mendengarkan data real-time)
         onValue(ref(db, 'currentTournament'), (snapshot) => {
             const data = snapshot.val();
             if (data) {
                 window.loadFromFirebase(data);
             } else {
                 console.log("Belum ada data turnamen aktif.");
-                // Jika kosong dan kita admin, kita bisa setup nanti
             }
         });
     </script>
@@ -52,8 +46,8 @@
             --ice-cyan: #00f3ff;
             --deep-blue: #0056b3;
             --bg-dark: #02060f;
-            --match-bg: rgba(2, 6, 15, 0.9);
-            --line-color: #334155;
+            --match-bg: rgba(2, 6, 15, 0.95); /* Lebih solid agar tulisan jelas */
+            --line-color: #475569;
         }
 
         body {
@@ -62,40 +56,86 @@
             color: var(--ice-cyan);
             font-family: 'Rajdhani', sans-serif;
             min-height: 100vh;
+            display: flex;
+            flex-direction: column;
         }
 
-        /* --- Scrollbar --- */
-        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        /* --- Scrollbar Custom --- */
+        ::-webkit-scrollbar { width: 10px; height: 10px; }
         ::-webkit-scrollbar-track { background: #02060f; }
-        ::-webkit-scrollbar-thumb { background: #0056b3; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb { background: #0056b3; border-radius: 5px; border: 2px solid #02060f; }
         ::-webkit-scrollbar-thumb:hover { background: #00f3ff; }
 
-        .tournament-container { display: flex; padding: 40px; }
-        .round { display: flex; flex-direction: column; justify-content: space-around; width: 260px; margin-right: 50px; }
-        .round-title { text-align: center; color: #fff; margin-bottom: 20px; font-weight: bold; border-bottom: 1px solid var(--ice-cyan); letter-spacing: 2px; }
+        /* --- BRACKET STRUCTURE (FIXED) --- */
+        .tournament-container { 
+            display: flex; 
+            padding: 60px 40px; /* Padding lebih besar agar tidak kepotong */
+            margin: 0 auto;
+        }
+        
+        .round { 
+            display: flex; 
+            flex-direction: column; 
+            justify-content: space-around; 
+            width: 280px; /* Lebar match diperluas */
+            margin-right: 60px; /* Jarak antar ronde diperluas */
+        }
+        
+        .round-title { 
+            text-align: center; 
+            color: #fff; 
+            margin-bottom: 30px; 
+            font-weight: bold; 
+            border-bottom: 2px solid var(--ice-cyan); 
+            letter-spacing: 2px; 
+            padding-bottom: 5px;
+            text-transform: uppercase;
+        }
         
         .match {
             background-color: var(--match-bg);
             border: 1px solid var(--line-color);
-            border-radius: 8px; padding: 8px; margin: 10px 0;
-            position: relative; cursor: default; transition: all 0.2s;
+            border-radius: 8px; 
+            padding: 10px; 
+            margin: 15px 0; /* Margin vertikal antar match */
+            position: relative; 
+            cursor: default; 
+            transition: all 0.2s;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
+            z-index: 10;
         }
-        .match.clickable:hover { border-color: var(--ice-cyan); cursor: pointer; box-shadow: 0 0 15px rgba(0, 243, 255, 0.2); }
+        .match.clickable:hover { 
+            border-color: var(--ice-cyan); 
+            cursor: pointer; 
+            box-shadow: 0 0 20px rgba(0, 243, 255, 0.3); 
+            transform: scale(1.02);
+        }
 
-        .team { display: flex; justify-content: space-between; align-items: center; padding: 6px; border-radius: 4px; }
-        .team-name { font-weight: 600; color: #cbd5e1; max-width: 160px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .team-score { font-family: monospace; font-size: 1.1rem; color: #fbbf24; font-weight: bold; background: rgba(0,0,0,0.5); padding: 0 8px; border-radius: 4px; min-width: 30px; text-align: center; }
+        .team { display: flex; justify-content: space-between; align-items: center; padding: 6px 8px; border-radius: 4px; }
+        .team-name { font-weight: 600; color: #cbd5e1; max-width: 180px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .team-score { font-family: monospace; font-size: 1.2rem; color: #fbbf24; font-weight: bold; background: rgba(0,0,0,0.6); padding: 0 10px; border-radius: 4px; min-width: 35px; text-align: center; }
 
         /* Winner Styles */
         .winner .team-name { color: var(--ice-cyan); text-shadow: 0 0 10px var(--ice-cyan); }
         .winner-row { background: linear-gradient(90deg, rgba(0,243,255,0.15), transparent); border-left: 3px solid var(--ice-cyan); }
 
-        /* Lines */
-        .match::after { content: ''; position: absolute; width: 25px; height: 1px; background: var(--line-color); right: -26px; top: 50%; z-index: 0; }
+        /* Lines (Connecting Lines) */
+        .match::after { content: ''; position: absolute; width: 30px; height: 2px; background: var(--line-color); right: -31px; top: 50%; z-index: 0; }
         .round:last-child .match::after { display: none; }
-        .match-pair-top::before { content: ''; position: absolute; width: 25px; height: 50%; border-right: 1px solid var(--line-color); right: -26px; top: 50%; z-index: 0; }
-        .match-pair-bottom::before { content: ''; position: absolute; width: 25px; height: 50%; border-right: 1px solid var(--line-color); right: -26px; bottom: 50%; z-index: 0; }
+        
+        /* Fork Lines */
+        .match-pair-top::before { 
+            content: ''; position: absolute; 
+            width: 30px; height: calc(50% + 15px); /* +15px kompensasi margin */
+            border-right: 2px solid var(--line-color); 
+            right: -31px; top: 50%; z-index: 0; 
+        }
+        .match-pair-bottom::before { 
+            content: ''; position: absolute; 
+            width: 30px; height: calc(50% + 15px); 
+            border-right: 2px solid var(--line-color); 
+            right: -31px; bottom: 50%; z-index: 0; 
+        }
 
         .cyber-btn {
             background: linear-gradient(90deg, rgba(0,243,255,0.1), rgba(0,86,179,0.2)); color: #fff; border: 1px solid rgba(0,243,255,0.3);
@@ -104,20 +144,13 @@
         .cyber-btn:hover { background: rgba(0,243,255,0.2); border-color: var(--ice-cyan); }
         
         .modal-bg { background: rgba(0,0,0,0.85); backdrop-filter: blur(5px); }
-        
-        /* Admin Only Elements */
         .admin-only { display: none !important; }
         
-        /* Mobile Optimization */
-        @media (max-width: 768px) {
-            .tournament-container { padding: 20px; }
-            .round { width: 220px; margin-right: 30px; }
-        }
     </style>
 </head>
 <body class="p-4">
 
-    <div class="max-w-7xl mx-auto mb-6">
+    <div class="max-w-7xl mx-auto mb-6 w-full">
         <div class="flex flex-col md:flex-row justify-between items-center gap-4 bg-[#02060f] p-4 rounded-xl border border-gray-800 shadow-lg relative z-20">
             <div>
                 <h1 class="text-3xl font-bold text-white uppercase tracking-widest text-shadow-glow">LIVE <span class="text-[#00f3ff]">BRACKET</span></h1>
@@ -136,9 +169,11 @@
         </div>
     </div>
 
-    <div class="overflow-x-auto pb-10 custom-scrollbar">
-        <div id="bracketContainer" class="tournament-container min-w-[1000px] flex items-center justify-center h-[50vh]">
-            <div class="text-center">
+    <div class="flex-grow overflow-auto custom-scrollbar w-full border border-gray-800 rounded-xl bg-[#050b14] relative">
+        <div class="absolute inset-0 opacity-10 pointer-events-none" style="background-image: linear-gradient(#1e293b 1px, transparent 1px), linear-gradient(to right, #1e293b 1px, transparent 1px); background-size: 40px 40px;"></div>
+
+        <div id="bracketContainer" class="tournament-container min-w-max min-h-[600px] flex items-center justify-center">
+            <div class="text-center relative z-10">
                 <i class="fas fa-satellite-dish text-4xl text-gray-700 mb-4 animate-bounce"></i>
                 <p class="text-gray-500 font-mono">Waiting for Tournament Data...</p>
                 <p class="text-xs text-gray-700 mt-2">If you are Admin, click "ADMIN" to Setup.</p>
@@ -201,25 +236,21 @@
         let selectedRoundIdx = -1;
         let selectedMatchIdx = -1;
 
-        // --- ADMIN AUTH (SIMPLE) ---
+        // --- ADMIN AUTH ---
         function enableAdminMode() {
-            // Password sederhana untuk proteksi client-side
             const pass = prompt("Enter Admin Password:");
             if(pass === "admin123") { 
                 isAdmin = true;
                 document.getElementById('adminControls').classList.remove('admin-only');
                 document.getElementById('btnAdminLogin').classList.add('hidden');
-                
-                // Refresh tampilan agar match jadi clickable buat admin
                 if(localData) renderBracket(localData);
-                
-                alert("Admin Mode Active: You can now edit matches.");
+                alert("Admin Mode Active.");
             } else {
                 alert("Wrong Password");
             }
         }
 
-        // --- FIREBASE SYNC FUNCTIONS ---
+        // --- FIREBASE SYNC ---
         window.loadFromFirebase = (data) => {
             localData = data;
             renderBracket(data);
@@ -231,51 +262,34 @@
             const rawNames = document.getElementById('teamNamesInput').value.trim().split('\n');
             let teams = rawNames.filter(n => n.trim() !== "");
             
-            // Auto fill TBA
             while(teams.length < count) teams.push(`Slot ${teams.length + 1}`);
             teams = teams.slice(0, count);
-            
-            // Acak Tim (Optional: Hapus baris ini jika ingin urut sesuai input)
             teams.sort(() => Math.random() - 0.5); 
 
             let structure = [];
             let matchIdCounter = 0;
             let totalRounds = Math.log2(count);
 
-            // Create Round 1
             let round1 = [];
             for (let i = 0; i < count; i += 2) {
                 round1.push({
-                    id: matchIdCounter++, 
-                    p1: teams[i], 
-                    p2: teams[i+1], 
-                    s1: 0, 
-                    s2: 0, 
-                    winner: null
+                    id: matchIdCounter++, p1: teams[i], p2: teams[i+1], s1: 0, s2: 0, winner: null
                 });
             }
             structure.push(round1);
 
-            // Create Subsequent Rounds
             for (let r = 1; r < totalRounds; r++) {
                 let prevRound = structure[r-1];
                 let currentRound = [];
                 for(let i = 0; i < prevRound.length; i += 2) {
                     currentRound.push({
-                        id: matchIdCounter++, 
-                        p1: "TBA", 
-                        p2: "TBA", 
-                        s1: 0, 
-                        s2: 0, 
-                        winner: null,
-                        sourceA: { r: r-1, m: i }, 
-                        sourceB: { r: r-1, m: i+1 }
+                        id: matchIdCounter++, p1: "TBA", p2: "TBA", s1: 0, s2: 0, winner: null,
+                        sourceA: { r: r-1, m: i }, sourceB: { r: r-1, m: i+1 }
                     });
                 }
                 structure.push(currentRound);
             }
 
-            // Save to Firebase (Ini akan otomatis menimpa data lama)
             window.saveTournament({ rounds: structure });
             closeModal('setupModal');
         }
@@ -302,12 +316,10 @@
                 round.forEach((match, mIndex) => {
                     const matchDiv = document.createElement('div');
                     let lineClass = '';
-                    // Garis penghubung
                     if (rIndex < data.rounds.length - 1) {
                          lineClass = (mIndex % 2 === 0) ? 'match-pair-bottom' : 'match-pair-top';
                     }
                     
-                    // Admin Interaction
                     let cursorClass = "cursor-default";
                     if(isAdmin) {
                         cursorClass = "clickable";
@@ -316,7 +328,6 @@
                     
                     matchDiv.className = `match ${lineClass} ${cursorClass}`;
 
-                    // Highlight Winner
                     const isP1Win = match.winner === match.p1 && match.winner !== "TBA" && match.winner !== null;
                     const isP2Win = match.winner === match.p2 && match.winner !== "TBA" && match.winner !== null;
 
@@ -336,7 +347,7 @@
                 container.appendChild(roundDiv);
             });
 
-            // Champion Display (Hanya muncul jika match terakhir selesai)
+            // Champion Display
             const finalRound = data.rounds[data.rounds.length - 1][0];
             if(finalRound.winner) {
                 const champDiv = document.createElement('div');
@@ -356,7 +367,7 @@
         function openScoreModal(rIdx, mIdx) {
             const match = localData.rounds[rIdx][mIdx];
             if(match.p1 === "TBA" || match.p2 === "TBA") {
-                alert("Match belum siap! Tunggu babak sebelumnya selesai."); return;
+                alert("Match belum siap!"); return;
             }
 
             selectedRoundIdx = rIdx; selectedMatchIdx = mIdx;
@@ -373,8 +384,6 @@
         function submitScore() {
             const rIdx = selectedRoundIdx;
             const mIdx = selectedMatchIdx;
-            
-            // Deep copy structure to avoid mutating read-only refs if any
             const rounds = JSON.parse(JSON.stringify(localData.rounds)); 
             const match = rounds[rIdx][mIdx];
 
@@ -384,33 +393,27 @@
             match.s1 = s1;
             match.s2 = s2;
 
-            // Logic Pemenang
             if (s1 > s2) match.winner = match.p1;
             else if (s2 > s1) match.winner = match.p2;
-            else match.winner = null; // Seri = belum ada pemenang
+            else match.winner = null;
 
-            // Logic Memajukan Pemenang ke Babak Selanjutnya
             const nextRIdx = rIdx + 1;
             if (match.winner && nextRIdx < rounds.length) {
                 const nextMIdx = Math.floor(mIdx / 2);
                 const isTopSlot = (mIdx % 2 === 0);
 
-                // Update nama tim di slot babak selanjutnya
                 if(isTopSlot) rounds[nextRIdx][nextMIdx].p1 = match.winner;
                 else rounds[nextRIdx][nextMIdx].p2 = match.winner;
                 
-                // Reset match selanjutnya jika terjadi perubahan sejarah (misal edit skor babak sebelumnya)
                 rounds[nextRIdx][nextMIdx].winner = null;
                 rounds[nextRIdx][nextMIdx].s1 = 0;
                 rounds[nextRIdx][nextMIdx].s2 = 0;
             }
 
-            // SAVE TO FIREBASE
             window.saveTournament({ rounds: rounds });
             closeModal('scoreModal');
         }
 
-        // --- UTILS ---
         function openSetupModal() { document.getElementById('setupModal').classList.remove('hidden'); }
         function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
     </script>
