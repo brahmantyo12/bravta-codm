@@ -12,7 +12,7 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getDatabase, ref, set, onValue, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-        // CONFIG FIREBASE MILIKMU
+        // CONFIG FIREBASE (JANGAN DIUBAH)
         const firebaseConfig = {
             apiKey: "AIzaSyCb71qnIjcHA9hBe20AHhQIX4xGlzgYk_Q",
             authDomain: "bravta-tournament.firebaseapp.com",
@@ -30,11 +30,7 @@
         
         onValue(ref(db, 'currentTournament'), (snapshot) => {
             const data = snapshot.val();
-            if (data) {
-                window.loadFromFirebase(data);
-            } else {
-                console.log("Belum ada data turnamen aktif.");
-            }
+            if (data) window.loadFromFirebase(data);
         });
     </script>
 
@@ -44,10 +40,10 @@
     <style>
         :root {
             --ice-cyan: #00f3ff;
-            --deep-blue: #0056b3;
             --bg-dark: #02060f;
             --match-bg: #0f172a;
             --line-color: #475569;
+            --card-height: 64px; /* Tinggi pasti setiap kotak match */
         }
 
         body {
@@ -56,122 +52,137 @@
             color: var(--ice-cyan);
             font-family: 'Rajdhani', sans-serif;
             min-height: 100vh;
-            display: flex; flex-direction: column;
+            display: flex; flex-direction: column; overflow: hidden;
         }
 
-        /* --- Scrollbar --- */
-        ::-webkit-scrollbar { width: 8px; height: 8px; }
-        ::-webkit-scrollbar-track { background: #02060f; }
-        ::-webkit-scrollbar-thumb { background: #0056b3; border-radius: 4px; }
-
-        /* --- BRACKET LAYOUT --- */
-        .tournament-container { 
-            display: flex; 
-            padding: 50px 20px;
-            margin: 0 auto;
+        /* --- LAYOUT UTAMA --- */
+        .bracket-wrapper {
+            flex-grow: 1;
+            overflow: auto;
+            display: flex;
+            align-items: center; /* Center Vertikal */
+            padding: 40px;
+            position: relative;
         }
         
-        .round { 
-            display: flex; 
-            flex-direction: column; 
-            justify-content: space-around; /* Menyebarkan pair secara merata */
-            width: 270px; 
-            margin-right: 50px; /* Jarak antar kolom ronde */
-        }
-        
-        .round-title { 
-            text-align: center; color: #fff; margin-bottom: 25px; font-weight: bold; 
-            border-bottom: 2px solid var(--ice-cyan); letter-spacing: 2px; padding-bottom: 5px;
-            text-transform: uppercase;
+        .tournament-tree {
+            display: flex;
+            flex-direction: row;
+            margin: auto; /* Center Horizontal */
         }
 
-        /* --- MATCH PAIR WRAPPER (KUNCI KERAPIHAN GARIS) --- */
+        .round {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-around; /* Kunci agar jarak match merata */
+            margin-right: 60px; /* Jarak antar ronde */
+            min-width: 260px;
+        }
+
+        .round-title {
+            text-align: center; color: white; margin-bottom: 20px;
+            font-weight: bold; text-transform: uppercase; letter-spacing: 2px;
+            border-bottom: 2px solid var(--ice-cyan); padding-bottom: 5px;
+        }
+
+        /* --- MATCH PAIR (WADAH 2 MATCH) --- */
+        /* Ini adalah kunci perbaikan garisnya */
         .match-pair {
             display: flex;
             flex-direction: column;
             justify-content: center;
             position: relative;
-            margin-bottom: 30px; /* Jarak antar grup pertandingan */
+            /* Margin dinamis akan diatur oleh flex-grow parent */
         }
 
-        /* Connector Siku (Bracket Shape ] ) */
-        .match-pair.has-connector::after {
+        /* --- GARIS PENGHUBUNG (Siku ] ) --- */
+        /* Kita gambar garis di wadah pair, bukan di match-nya */
+        .match-pair.connected::after {
             content: '';
             position: absolute;
-            top: 45px;    /* Titik tengah Match Atas (Estimasi tinggi match 90px / 2) */
-            bottom: 45px; /* Titik tengah Match Bawah */
-            right: -25px; /* Geser ke kanan luar box */
-            width: 25px;
+            right: -30px; /* Geser ke kanan ronde */
+            width: 30px;
             border-right: 2px solid var(--line-color);
+            /* Kalkulasi Siku: Mulai dari tengah Match Atas s.d. Tengah Match Bawah */
+            top: calc(var(--card-height) / 2); 
+            bottom: calc(var(--card-height) / 2);
+            /* Garis Horizontal Atas & Bawah */
             border-top: 2px solid var(--line-color);
             border-bottom: 2px solid var(--line-color);
             z-index: 0;
         }
 
-        /* Connector Garis Lurus ke Ronde Berikutnya */
-        .match-pair.has-connector::before {
+        /* Garis Keluar menuju ronde berikutnya */
+        .match-pair.connected::before {
             content: '';
             position: absolute;
+            right: -60px; /* Nyambung ke ronde sebelah */
             top: 50%;
-            right: -50px; /* Panjang garis ke ronde sebelah */
-            width: 25px;
+            width: 30px;
             height: 2px;
             background: var(--line-color);
             z-index: 0;
         }
-        
+
         /* --- MATCH CARD --- */
         .match {
             background-color: var(--match-bg);
             border: 1px solid var(--line-color);
-            border-radius: 6px; 
-            padding: 8px; 
-            position: relative; 
-            margin: 10px 0; /* Jarak vertikal antar kotak dalam satu pair */
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
-            z-index: 10; /* Agar kotak ada di atas garis */
-            height: 70px; /* FIXED HEIGHT agar kalkulasi garis presisi */
+            border-radius: 6px;
+            padding: 0 10px;
+            margin: 10px 0; /* Jarak antar kotak dalam 1 pair */
+            height: var(--card-height); /* Tinggi FIX */
             display: flex;
             flex-direction: column;
             justify-content: center;
-        }
-        .match.clickable:hover { 
-            border-color: var(--ice-cyan); cursor: pointer; 
-            box-shadow: 0 0 15px rgba(0, 243, 255, 0.2); 
+            position: relative;
+            z-index: 10;
+            transition: all 0.2s;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.5);
         }
 
-        .team { display: flex; justify-content: space-between; align-items: center; padding: 2px 6px; }
-        .team-name { font-weight: 600; color: #94a3b8; max-width: 170px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .team-score { font-family: monospace; font-size: 1.1rem; color: #fbbf24; font-weight: bold; background: rgba(0,0,0,0.4); padding: 0 8px; border-radius: 3px; min-width: 30px; text-align: center; }
+        .match.clickable:hover {
+            border-color: var(--ice-cyan);
+            cursor: pointer;
+            box-shadow: 0 0 15px rgba(0, 243, 255, 0.3);
+            transform: scale(1.02);
+        }
 
-        .winner .team-name { color: var(--ice-cyan); text-shadow: 0 0 8px rgba(0,243,255,0.6); }
+        .team { display: flex; justify-content: space-between; align-items: center; font-size: 0.9rem; }
+        .team-name { font-weight: 600; color: #94a3b8; max-width: 160px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .team-score { font-family: monospace; font-weight: bold; color: #fbbf24; background: rgba(0,0,0,0.4); padding: 0 6px; border-radius: 3px; min-width: 25px; text-align: center; }
+
+        .winner .team-name { color: var(--ice-cyan); text-shadow: 0 0 5px var(--ice-cyan); }
         .winner-row { background: linear-gradient(90deg, rgba(0,243,255,0.1), transparent); border-left: 2px solid var(--ice-cyan); }
 
-        /* Khusus Final & Champion */
-        .round.final-round .match { margin: auto; } /* Center vertical */
+        /* Khusus Final Round */
+        .final-round .match { margin: auto; } /* Center vertical */
         
+        /* UI Components */
         .cyber-btn {
             background: linear-gradient(90deg, rgba(0,243,255,0.1), rgba(0,86,179,0.2)); color: #fff; border: 1px solid rgba(0,243,255,0.3);
             padding: 8px 16px; border-radius: 4px; text-transform: uppercase; font-weight: bold; transition: 0.3s;
         }
         .cyber-btn:hover { background: rgba(0,243,255,0.2); border-color: var(--ice-cyan); }
-        .modal-bg { background: rgba(0,0,0,0.85); backdrop-filter: blur(5px); }
+        .modal-bg { background: rgba(0,0,0,0.9); backdrop-filter: blur(5px); }
         .admin-only { display: none !important; }
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #02060f; }
+        ::-webkit-scrollbar-thumb { background: #0056b3; border-radius: 4px; }
 
     </style>
 </head>
 <body class="p-4">
 
-    <div class="max-w-7xl mx-auto mb-6 w-full">
-        <div class="flex flex-col md:flex-row justify-between items-center gap-4 bg-[#02060f] p-4 rounded-xl border border-gray-800 shadow-lg relative z-20">
+    <div class="max-w-7xl mx-auto w-full z-20 relative">
+        <div class="flex flex-col md:flex-row justify-between items-center gap-4 bg-[#02060f] p-4 rounded-xl border border-gray-800 shadow-lg">
             <div>
-                <h1 class="text-3xl font-bold text-white uppercase tracking-widest text-shadow-glow">LIVE <span class="text-[#00f3ff]">BRACKET</span></h1>
+                <h1 class="text-3xl font-bold text-white uppercase tracking-widest">LIVE <span class="text-[#00f3ff]">BRACKET</span></h1>
                 <div class="flex items-center gap-2 mt-1">
                     <div class="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
                     <p class="text-xs text-gray-400 tracking-wider">REAL-TIME CONNECTED</p>
                 </div>
             </div>
-            
             <div class="flex gap-2">
                 <div id="adminControls" class="admin-only flex gap-2">
                     <button onclick="openSetupModal()" class="cyber-btn border-yellow-500/50 text-yellow-400 hover:text-white"><i class="fas fa-tools mr-2"></i> SETUP</button>
@@ -181,11 +192,11 @@
         </div>
     </div>
 
-    <div class="flex-grow overflow-auto custom-scrollbar w-full border border-gray-800 rounded-xl bg-[#050b14] relative">
+    <div class="bracket-wrapper custom-scrollbar">
         <div class="absolute inset-0 opacity-10 pointer-events-none" style="background-image: linear-gradient(#1e293b 1px, transparent 1px), linear-gradient(to right, #1e293b 1px, transparent 1px); background-size: 40px 40px;"></div>
 
-        <div id="bracketContainer" class="tournament-container min-w-max min-h-[600px] flex items-center justify-center">
-            <div class="text-center relative z-10">
+        <div id="bracketContainer" class="tournament-tree">
+            <div class="text-center relative z-10 m-auto">
                 <i class="fas fa-satellite-dish text-4xl text-gray-700 mb-4 animate-bounce"></i>
                 <p class="text-gray-500 font-mono">Waiting for Tournament Data...</p>
             </div>
@@ -194,22 +205,22 @@
 
     <div id="setupModal" class="fixed inset-0 modal-bg hidden z-50 flex items-center justify-center p-4">
         <div class="bg-[#0f172a] border border-[#00f3ff] p-6 rounded-xl w-full max-w-md shadow-[0_0_50px_rgba(0,243,255,0.1)]">
-            <h2 class="text-xl font-bold text-white mb-4 border-b border-gray-700 pb-2">SETUP NEW TOURNAMENT</h2>
-            <p class="text-xs text-red-400 mb-4 bg-red-900/20 p-2 rounded border border-red-900/50">⚠️ Warning: Data turnamen lama akan terhapus!</p>
+            <h2 class="text-xl font-bold text-white mb-4 border-b border-gray-700 pb-2">SETUP TOURNAMENT</h2>
+            <p class="text-xs text-red-400 mb-4 bg-red-900/20 p-2 rounded">⚠️ Data lama akan terhapus!</p>
             
             <label class="block text-sm text-[#00f3ff] mb-2 font-bold">Jumlah Tim:</label>
             <select id="teamCount" class="w-full bg-black text-white border border-gray-600 rounded p-3 mb-4 focus:border-[#00f3ff] outline-none">
-                <option value="4">4 Tim (Semi Final)</option>
-                <option value="8" selected>8 Tim (Quarter Final)</option>
-                <option value="16">16 Tim (Round of 16)</option>
+                <option value="4">4 Tim</option>
+                <option value="8" selected>8 Tim</option>
+                <option value="16">16 Tim</option>
             </select>
 
             <label class="block text-sm text-[#00f3ff] mb-2 font-bold">Nama Tim (1 per baris):</label>
-            <textarea id="teamNamesInput" rows="6" class="w-full bg-black text-white border border-gray-600 rounded p-3 text-sm focus:border-[#00f3ff] outline-none" placeholder="Team Alpha&#10;Team Bravo&#10;Team Charlie..."></textarea>
+            <textarea id="teamNamesInput" rows="6" class="w-full bg-black text-white border border-gray-600 rounded p-3 text-sm focus:border-[#00f3ff] outline-none" placeholder="Team A&#10;Team B..."></textarea>
             
             <div class="flex justify-end gap-3 mt-6">
-                <button onclick="closeModal('setupModal')" class="px-4 text-gray-400 hover:text-white transition">Cancel</button>
-                <button onclick="generateAndSave()" class="cyber-btn bg-red-600/20 border-red-500 hover:bg-red-600 hover:border-red-400">CREATE NEW</button>
+                <button onclick="closeModal('setupModal')" class="px-4 text-gray-400 hover:text-white">Cancel</button>
+                <button onclick="generateAndSave()" class="cyber-btn bg-red-600/20 border-red-500">CREATE</button>
             </div>
         </div>
     </div>
@@ -221,33 +232,27 @@
 
             <div class="flex justify-between items-center mb-4 bg-black/40 p-3 rounded border border-gray-800">
                 <span id="scoreTeamA" class="font-bold text-white text-lg truncate w-32">Team A</span>
-                <input type="number" id="inputScoreA" class="w-16 bg-[#02060f] border border-gray-600 text-center text-yellow-400 font-bold text-xl rounded p-1 focus:border-yellow-400 outline-none" value="0">
+                <input type="number" id="inputScoreA" class="w-16 bg-[#02060f] border border-gray-600 text-center text-yellow-400 font-bold text-xl rounded p-1 outline-none" value="0">
             </div>
-
             <div class="flex justify-center text-gray-600 text-xs font-bold mb-4">- VS -</div>
-
             <div class="flex justify-between items-center mb-8 bg-black/40 p-3 rounded border border-gray-800">
                 <span id="scoreTeamB" class="font-bold text-white text-lg truncate w-32">Team B</span>
-                <input type="number" id="inputScoreB" class="w-16 bg-[#02060f] border border-gray-600 text-center text-yellow-400 font-bold text-xl rounded p-1 focus:border-yellow-400 outline-none" value="0">
+                <input type="number" id="inputScoreB" class="w-16 bg-[#02060f] border border-gray-600 text-center text-yellow-400 font-bold text-xl rounded p-1 outline-none" value="0">
             </div>
 
             <div class="flex flex-col gap-3">
-                <button onclick="submitScore()" class="cyber-btn w-full bg-green-900/20 text-green-400 border-green-500 hover:bg-green-600 hover:text-white">
-                    <i class="fas fa-check mr-2"></i> UPDATE SCORE
-                </button>
-                <button onclick="closeModal('scoreModal')" class="text-gray-500 text-sm hover:text-white transition">Cancel</button>
+                <button onclick="submitScore()" class="cyber-btn w-full bg-green-900/20 text-green-400 border-green-500"><i class="fas fa-check mr-2"></i> UPDATE</button>
+                <button onclick="closeModal('scoreModal')" class="text-gray-500 text-sm">Cancel</button>
             </div>
         </div>
     </div>
 
     <script>
-        // --- GLOBAL VARIABLES ---
         let localData = null;
         let isAdmin = false;
         let selectedRoundIdx = -1;
         let selectedMatchIdx = -1;
 
-        // --- ADMIN AUTH ---
         function enableAdminMode() {
             const pass = prompt("Enter Admin Password:");
             if(pass === "admin123") { 
@@ -256,23 +261,18 @@
                 document.getElementById('btnAdminLogin').classList.add('hidden');
                 if(localData) renderBracket(localData);
                 alert("Admin Mode Active.");
-            } else {
-                alert("Wrong Password");
-            }
+            } else { alert("Wrong Password"); }
         }
 
-        // --- FIREBASE SYNC ---
         window.loadFromFirebase = (data) => {
             localData = data;
             renderBracket(data);
         };
 
-        // --- GENERATOR LOGIC ---
         function generateAndSave() {
             const count = parseInt(document.getElementById('teamCount').value);
             const rawNames = document.getElementById('teamNamesInput').value.trim().split('\n');
             let teams = rawNames.filter(n => n.trim() !== "");
-            
             while(teams.length < count) teams.push(`Slot ${teams.length + 1}`);
             teams = teams.slice(0, count);
             teams.sort(() => Math.random() - 0.5); 
@@ -281,7 +281,6 @@
             let matchIdCounter = 0;
             let totalRounds = Math.log2(count);
 
-            // Create Round 1
             let round1 = [];
             for (let i = 0; i < count; i += 2) {
                 round1.push({
@@ -290,26 +289,21 @@
             }
             structure.push(round1);
 
-            // Create Next Rounds
             for (let r = 1; r < totalRounds; r++) {
                 let prevRound = structure[r-1];
                 let currentRound = [];
-                let matchesInPrev = prevRound.length;
-                
-                // Jumlah match di ronde ini adalah setengah dari ronde sebelumnya
-                for(let i = 0; i < matchesInPrev; i += 2) {
+                for(let i = 0; i < prevRound.length; i += 2) {
                     currentRound.push({
-                        id: matchIdCounter++, p1: "TBA", p2: "TBA", s1: 0, s2: 0, winner: null,
+                        id: matchIdCounter++, p1: "TBA", p2: "TBA", s1: 0, s2: 0, winner: null
                     });
                 }
                 structure.push(currentRound);
             }
-
             window.saveTournament({ rounds: structure });
             closeModal('setupModal');
         }
 
-        // --- RENDER LOGIC (WITH PAIR GROUPING) ---
+        // --- CORE RENDER FUNCTION (REBUILT) ---
         function renderBracket(data) {
             const container = document.getElementById('bracketContainer');
             container.innerHTML = '';
@@ -322,7 +316,6 @@
             data.rounds.forEach((round, rIndex) => {
                 const roundDiv = document.createElement('div');
                 const isFinalRound = rIndex === data.rounds.length - 1;
-                
                 roundDiv.className = `round ${isFinalRound ? 'final-round' : ''}`;
                 
                 const title = document.createElement('div');
@@ -330,50 +323,39 @@
                 title.innerText = roundNames[startIndex + rIndex] || `Round ${rIndex+1}`;
                 roundDiv.appendChild(title);
 
-                // --- NEW LOGIC: GROUP BY PAIRS ---
+                // --- GROUPING LOGIC ---
                 if (!isFinalRound) {
-                    // Untuk ronde biasa, kita group per 2 match (Pair)
+                    // Ronde Biasa: Dikelompokkan berdua (PAIR) untuk membuat garis siku
                     for(let i = 0; i < round.length; i += 2) {
                         const pairDiv = document.createElement('div');
-                        pairDiv.className = 'match-pair has-connector'; // Punya garis penghubung
+                        pairDiv.className = 'match-pair connected'; // Tambahkan class connector
 
-                        // Match 1 (Top)
+                        // Match A (Top)
                         pairDiv.appendChild(createMatchDiv(round[i], rIndex, i));
-                        
-                        // Match 2 (Bottom)
-                        if (round[i+1]) {
-                            pairDiv.appendChild(createMatchDiv(round[i+1], rIndex, i+1));
-                        }
+                        // Match B (Bottom)
+                        if (round[i+1]) pairDiv.appendChild(createMatchDiv(round[i+1], rIndex, i+1));
 
                         roundDiv.appendChild(pairDiv);
                     }
                 } else {
-                    // Untuk Grand Final (Hanya 1 match, tidak perlu pair wrapper connector)
+                    // Final Round: Tidak ada connector, berdiri sendiri
                     roundDiv.appendChild(createMatchDiv(round[0], rIndex, 0));
                 }
-
                 container.appendChild(roundDiv);
             });
 
-            // Champion Display
+            // Champion
             const finalRound = data.rounds[data.rounds.length - 1][0];
-            if(finalRound.winner) {
-                renderChampion(container, finalRound.winner);
-            }
+            if(finalRound.winner) renderChampion(container, finalRound.winner);
         }
 
-        // Helper function to create Match HTML
         function createMatchDiv(match, rIndex, mIndex) {
             const matchDiv = document.createElement('div');
-            let cursorClass = "cursor-default";
-            if(isAdmin) {
-                cursorClass = "clickable";
-                matchDiv.onclick = () => openScoreModal(rIndex, mIndex);
-            }
-            matchDiv.className = `match ${cursorClass}`;
+            matchDiv.className = `match ${isAdmin ? 'clickable' : ''}`;
+            if(isAdmin) matchDiv.onclick = () => openScoreModal(rIndex, mIndex);
 
-            const isP1Win = match.winner === match.p1 && match.winner !== "TBA" && match.winner !== null;
-            const isP2Win = match.winner === match.p2 && match.winner !== "TBA" && match.winner !== null;
+            const isP1Win = match.winner === match.p1 && match.winner && match.winner !== "TBA";
+            const isP2Win = match.winner === match.p2 && match.winner && match.winner !== "TBA";
 
             matchDiv.innerHTML = `
                 <div class="team ${isP1Win ? 'winner-row winner' : ''}">
@@ -391,7 +373,7 @@
 
         function renderChampion(container, winnerName) {
             const champDiv = document.createElement('div');
-            champDiv.className = 'round justify-center ml-10'; // Tambah margin kiri
+            champDiv.className = 'round justify-center ml-10';
             champDiv.style.width = '240px';
             champDiv.innerHTML = `
                 <div class="round-title text-yellow-400"><i class="fas fa-crown"></i> CHAMPION</div>
@@ -403,12 +385,9 @@
             container.appendChild(champDiv);
         }
 
-        // --- SCORING LOGIC ---
         function openScoreModal(rIdx, mIdx) {
             const match = localData.rounds[rIdx][mIdx];
-            if(match.p1 === "TBA" || match.p2 === "TBA") {
-                alert("Match belum siap!"); return;
-            }
+            if(match.p1 === "TBA" || match.p2 === "TBA") { alert("Match belum siap!"); return; }
             selectedRoundIdx = rIdx; selectedMatchIdx = mIdx;
             document.querySelector('.match-id-display').innerText = `${match.p1} vs ${match.p2}`;
             document.getElementById('scoreTeamA').innerText = match.p1;
@@ -419,8 +398,7 @@
         }
 
         function submitScore() {
-            const rIdx = selectedRoundIdx;
-            const mIdx = selectedMatchIdx;
+            const rIdx = selectedRoundIdx; const mIdx = selectedMatchIdx;
             const rounds = JSON.parse(JSON.stringify(localData.rounds)); 
             const match = rounds[rIdx][mIdx];
             const s1 = parseInt(document.getElementById('inputScoreA').value);
